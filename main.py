@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from flask import Flask, render_template, request, jsonify, send_file, Response
-import requests
-from graphviz import Source
-from PIL import Image
-from io import BytesIO
-from base64 import b64encode
+from flask import Flask, render_template, request, jsonify
 
-from parser import parse_to_dot
+from lib.parser import parse_to_dot
 
 app = Flask(__name__)
 
@@ -22,15 +17,7 @@ def generate_dot(methods=["GET"]):
     app.logger.info("GOT: " + text)
     dot_repr = parse_to_dot(text)
 
-    f = _dot2pngfile(dot_repr)
-    picture = "data:image/png;base64, " + b64encode(f.getvalue())
-
-    return jsonify(dot_repr=dot_repr, picture=picture)
-
-def _dot2pngfile(dot_repr):
-    s = Source(dot_repr, format="png")
-    f = BytesIO(s.pipe())
-    return f
+    return jsonify(dot_repr=dot_repr)
 
 # run locally
 if __name__ == '__main__':

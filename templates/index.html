@@ -10,7 +10,7 @@ $(function() {
             input_text: $('textarea[name="input_text"]').val()
         }, function(data) {
             $("#dot_repr").text(data.dot_repr);
-            document.getElementById("picture").src = data.picture;
+            document.getElementById("picture").src = "https://chart.googleapis.com/chart?cht=gv:dot&chs=350x350&chl=" + data.dot_repr;
         });
         return false;
     });
@@ -27,6 +27,6 @@ xgboost .uses Python<br>
 <p><a href="javascript:void();" id="calculate">Generate graph</a>
 
 <p> Graph
-<p><img id="picture"/>
+<p><img alt="neato chart" id="picture"/>
 <p> DOT representation:
 <p><span id="dot_repr"></span>

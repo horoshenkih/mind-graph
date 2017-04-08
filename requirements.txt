@@ -1,4 +1,3 @@
 networkx
 Flask
 ninja2
-graphviz

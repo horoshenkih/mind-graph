@@ -1,1 +1,1 @@
-yes | gcloud app deploy
+yes | gcloud app deploy --project mind-graph
