@@ -1,0 +1,15 @@
+# first tree: technologies
+Programming Language @is Technology
+CI @is Technology
+
+Python @is Programming Language
+Travis @is CI
+
+# second tree: projects
+# for now, use 'dummy' relation @is2 to separate by colors
+Data Science @is2 Project
+xgboost @is2 Data Science
+
+# relations
+xgboost @uses Travis
+xgboost @uses Python
