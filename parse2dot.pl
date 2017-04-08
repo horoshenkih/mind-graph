@@ -21,8 +21,9 @@ while(<>) {
 	s/\s+$//;
 	s/\s+/ /;
 
-	# some text @relation some other text
-	/^(.+)\s+@(\S+)\s+(.+)/;
+	# some text .relation some other text
+	# '.' symbol is the most common punctuation sign
+	/^(.+)\s+\.(\S+)\s+(.+)/;
 	push @{$relations{$2}}, [$1, $3];
 }
 
