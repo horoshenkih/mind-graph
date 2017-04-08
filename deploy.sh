@@ -1,0 +1,1 @@
+yes | gcloud app deploy

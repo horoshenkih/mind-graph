@@ -37,7 +37,7 @@ for my $relation (keys %relations) {
 	$attributes{dir} = 'none' if $relation =~ /^is/;
 	my $attributes_repr = join(",", map {$_."=".$attributes{$_}} keys %attributes);
 	for my $edge (@{$relations{$relation}}) {
-  	push @edges_repr, quote($edge->[0]) . " -> " . quote($edge->[1]) . " [$attributes_repr]";
+  	    push @edges_repr, quote($edge->[0]) . " -> " . quote($edge->[1]) . " [$attributes_repr]";
 	}
 }
 

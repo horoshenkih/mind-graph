@@ -1,0 +1,32 @@
+<!doctype html>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<title>MindGraph</title>
+<h2>MindGraph v0</h2>
+
+<script type=text/javascript>
+$(function() {
+    $('a#calculate').bind('click', function() {
+        $.getJSON('/generate_dot', {
+            input_text: $('textarea[name="input_text"]').val()
+        }, function(data) {
+            $("#dot_repr").text(data.dot_repr);
+            document.getElementById("picture").src = data.picture;
+        });
+        return false;
+    });
+});
+</script>
+
+<h3>Example</h3>
+xgboost .is Project<br>
+Python .is Programming language<br>
+xgboost .uses Python<br>
+
+<h3>Input</h3>
+<textarea name="input_text" cols="40" rows="15"></textarea>
+<p><a href="javascript:void();" id="calculate">Generate graph</a>
+
+<p> Graph
+<p><img id="picture"/>
+<p> DOT representation:
+<p><span id="dot_repr"></span>
