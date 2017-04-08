@@ -22,13 +22,30 @@
         });
         </script>
 
-        <h3>Example</h3>
-        xgboost .is Project<br>
-        Python .is Programming language<br>
-        xgboost .uses Python<br>
-
         <h3>Input</h3>
-        <textarea name="input_text" cols="40" rows="15"></textarea>
+        <textarea name="input_text" cols="40" rows="15">
+# first tree: technologies
+Programming Language .is Technology
+CI .is Technology
+
+Python .is Programming Language
+C++ .is Programming Language
+Travis .is CI
+
+# second tree: projects
+# for now, use 'dummy' relation .is2 to separate by colors
+Data Science .is2 Project
+xgboost .is2 Data Science
+sklearn .is2 Data Science
+
+# relations
+xgboost .uses Travis
+xgboost .uses Python
+xgboost .uses C++
+
+sklearn .uses Travis
+sklearn .uses Python
+        </textarea>
         <p><a href="javascript:void();" id="calculate">Generate graph</a>
     </div>
 
