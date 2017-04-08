@@ -26,16 +26,17 @@ while(<>) {
 	push @{$relations{$2}}, [$1, $3];
 }
 
-#print Dumper \%relations;
-
 # generate output
 my @edges_repr;
 my $i = 0;
 my $n_relations = scalar keys %relations;
 for my $relation (keys %relations) {
 	my $color = $COLORS[$i++ % $n_relations];
+	my %attributes = (color => $color);
+	$attributes{dir} = 'none' if $relation =~ /^is/;
+	my $attributes_repr = join(",", map {$_."=".$attributes{$_}} keys %attributes);
 	for my $edge (@{$relations{$relation}}) {
-  	push @edges_repr, quote($edge->[0]) . " -> " . quote($edge->[1]) . " [color=$color]";
+  	push @edges_repr, quote($edge->[0]) . " -> " . quote($edge->[1]) . " [$attributes_repr]";
 	}
 }
 
