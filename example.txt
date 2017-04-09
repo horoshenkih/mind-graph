@@ -7,10 +7,9 @@ C++ .is Programming Language
 Travis .is CI
 
 # second tree: projects
-# for now, use 'dummy' relation .is2 to separate by colors
-Data Science .is2 Project
-xgboost .is2 Data Science
-sklearn .is2 Data Science
+Data Science .is Project
+xgboost .is Data Science
+sklearn .is Data Science
 
 # relations
 xgboost .uses Travis
