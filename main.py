@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import logging
 
 from flask import Flask, render_template, request, jsonify
 
-from lib.parser import parse_to_dot
+from mindgraph.parser import Parser
 
 app = Flask(__name__)
+ps = Parser()
 
 @app.route('/')
 def index(name=None):
@@ -15,7 +15,7 @@ def index(name=None):
 def generate_dot(methods=["GET"]):
     text = request.args.get('input_text', "", type=str)
     app.logger.info("GOT: " + text)
-    dot_repr = parse_to_dot(text)
+    dot_repr = ps.parse_to_dot(text)
 
     return jsonify(dot_repr=dot_repr)
 
