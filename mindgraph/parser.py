@@ -10,8 +10,8 @@ class Parser:
     groups = re.compile(r'^(.+)\s+\.(\S+)\s+(.+)$')
     enumerations = re.compile(r'\s*,\s*')
 
-    def parse_to_dot(self, text):
-        relations = defaultdict(nx.Graph)
+    def parse_relations(self, text):
+        relations = []
         for line in text.split('\n'):
             # cleanup
             line = line.strip()
@@ -24,10 +24,18 @@ class Parser:
             if m:
                 f, r, t = m.group(1,2,3)
                 for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
-                    relations[r].add_edge(fi,ti,relation=r)
+                    relations.append((fi, r, ti))
+        return relations
 
+    def make_graphs(self, relations):
+        rgraphs = defaultdict(nx.Graph)
+        for f, r, t in relations:
+            rgraphs[r].add_edge(f, t, relation=r)
+        return rgraphs
+
+    def make_dot(self, rgraphs):
         rel_edges = []  # (relation, edges), (relation, edges), ...
-        for relation, graph in relations.items():
+        for relation, graph in rgraphs.items():
             for component in nx.connected_components(graph):
                 subgraph = graph.subgraph(component)
                 edges = subgraph.edges()
@@ -43,6 +51,11 @@ class Parser:
                 rel_edges.append([relation, edge_reprs])
 
         return self._rel_edges_to_dot(rel_edges)
+
+    def parse_to_dot(self, text):
+        relations = self.parse_relations(text)
+        rgraphs = self.make_graphs(relations)
+        return self.make_dot(rgraphs)
 
     def _arc_repr(self, v1, v2, attributes=None):
         qv1 = self._quote(v1)
