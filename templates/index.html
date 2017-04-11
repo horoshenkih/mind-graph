@@ -16,11 +16,10 @@
                     input_text: $('textarea[name="input_text"]').val()
                 }, function(data) {
                     $("#dot_repr").text(data.dot_repr);
-                    //document.getElementById("picture").src = "https://chart.googleapis.com/chart?cht=gv:dot&chs=500x500&chl=" + data.dot_repr;
-                    //document.getElementById("picture").src = Viz(data.dot_repr, { format: "png-image-element" });
-                    image = Viz(data.dot_repr, { format: "png-image-element" });
-                    pic = document.getElementById("picture");
-                    pic.parentNode.replaceChild(image, pic);
+                    var image = Viz.svgXmlToPngImageElement(Viz(data.dot_repr));
+                    image.onload = function() {
+                        document.getElementById("picture").src = image.src;
+                    };
                 });
                 return false;
             });
@@ -46,7 +45,7 @@ sklearn .uses Travis, Python</textarea>
 
     <div style='float:left; width:30%'>
         <p> Graph
-        <p><img id="picture"/>
+        <p><img id="picture" src=""></img>
         <p> DOT representation:
         <p><span id="dot_repr"></span>
     </div>
