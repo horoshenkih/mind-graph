@@ -1,5 +1,6 @@
 import re
 from collections import defaultdict
+from itertools import product
 import networkx as nx
 
 
@@ -7,6 +8,7 @@ class Parser:
     COLORS = ['blue', 'green', 'red']
     spaces = re.compile(r'\s+')
     groups = re.compile(r'^(.+)\s+\.(\S+)\s+(.+)$')
+    enumerations = re.compile(r'\s*,\s*')
 
     def parse_to_dot(self, text):
         relations = defaultdict(nx.Graph)
@@ -21,7 +23,8 @@ class Parser:
             m = self.groups.search(line)
             if m:
                 f, r, t = m.group(1,2,3)
-                relations[r].add_edge(f,t,relation=r)
+                for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
+                    relations[r].add_edge(fi,ti,relation=r)
 
         rel_edges = []  # (relation, edges), (relation, edges), ...
         for relation, graph in relations.items():
