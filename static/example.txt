@@ -1,20 +1,14 @@
 # first tree: technologies
-Programming Language .is Technology
-CI .is Technology
+Programming Language, CI .is Technology
 
-Python .is Programming Language
-C++ .is Programming Language
+Python, C++ .is Programming Language
 Travis .is CI
 
 # second tree: projects
 Data Science .is Project
-xgboost .is Data Science
-sklearn .is Data Science
+xgboost, sklearn .is Data Science
 
 # relations
-xgboost .uses Travis
-xgboost .uses Python
-xgboost .uses C++
+xgboost .uses Travis, Python, C++
 
-sklearn .uses Travis
-sklearn .uses Python
+sklearn .uses Travis, Python
