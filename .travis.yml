@@ -1,4 +1,13 @@
 language: python
 python: 3.5
-install: "pip install -r requirements.txt"
+install: pip install -r requirements.txt
 script: py.test mindgraph/t
+
+deploy:
+  provider: gae
+  keyfile: mind-graph-23440bbdaea2.json.enc
+  project: mind-graph
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_6a6aab7eaf3e_key -iv $encrypted_6a6aab7eaf3e_iv
+  -in mind-graph-23440bbdaea2.json.enc -out mind-graph-23440bbdaea2.json -d
