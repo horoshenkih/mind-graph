@@ -5,7 +5,7 @@ script: py.test mindgraph/t
 
 deploy:
   provider: gae
-  keyfile: mind-graph-23440bbdaea2.json.enc
+  keyfile: mind-graph-23440bbdaea2.json
   project: mind-graph
 
 before_install:
