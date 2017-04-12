@@ -4,38 +4,52 @@ from itertools import product
 import networkx as nx
 
 
-class Parser:
+class Node:
+    def __init__(self, name=None, attributes=None):
+        self._name = name
+        self._attributes = attributes
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def attributes(self):
+        return self._attributes
+
+
+class RelationGraph:
     COLORS = ['blue', 'green', 'red']
-    spaces = re.compile(r'\s+')
-    groups = re.compile(r'^(.+)\s+\.(\S+)\s+(.+)$')
-    enumerations = re.compile(r'\s*,\s*')
 
-    def parse_relations(self, text):
-        relations = []
-        for line in text.split('\n'):
-            # cleanup
-            line = line.strip()
-            if not len(line) or line.startswith('#'):
-                continue
-            line = self.spaces.sub(' ', line)
+    def __init__(self):
+        self._rgraphs = defaultdict(nx.Graph)  # {relation_name: rgaph}
+        self._nodes = dict()  # {name: attributes}
 
-            # parse
-            m = self.groups.search(line)
-            if m:
-                f, r, t = m.group(1,2,3)
-                for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
-                    relations.append((fi, r, ti))
-        return relations
+    def add_relation(self, node1, relation, node2):
+        # for each node set first set of not None attributes
+        for n in (node1, node2):
+            if self._nodes.get(n.name) is None and n.attributes is not None:
+                self._nodes[n.name] = n.attributes
+            else:
+                self._nodes[n.name] = None
 
-    def make_graphs(self, relations):
-        rgraphs = defaultdict(nx.Graph)
-        for f, r, t in relations:
-            rgraphs[r].add_edge(f, t, relation=r)
-        return rgraphs
+        self._rgraphs[relation].add_edge(node1.name, node2.name, relation=relation)
 
-    def make_dot(self, rgraphs):
+    def get_relations(self, name1, name2):
+        all_relations = []
+
+        for r, rgraph in self._rgraphs.items():
+            if rgraph.has_edge(name1, name2):
+                all_relations.append(r)
+
+        return set(all_relations)
+
+    def get_nodes(self):
+        return self._nodes.keys()
+
+    def make_dot(self):
         rel_edges = []  # (relation, edges), (relation, edges), ...
-        for relation, graph in rgraphs.items():
+        for relation, graph in self._rgraphs.items():
             for component in nx.connected_components(graph):
                 subgraph = graph.subgraph(component)
                 edges = subgraph.edges()
@@ -52,10 +66,8 @@ class Parser:
 
         return self._rel_edges_to_dot(rel_edges)
 
-    def parse_to_dot(self, text):
-        relations = self.parse_relations(text)
-        rgraphs = self.make_graphs(relations)
-        return self.make_dot(rgraphs)
+    def _quote(self, text):
+        return '"{}"'.format(text)
 
     def _arc_repr(self, v1, v2, attributes=None):
         qv1 = self._quote(v1)
@@ -80,5 +92,38 @@ class Parser:
         cluster_reprs = [" subgraph cluster_"+relation + " {\n" + ";\n".join(edges) + "}\n" for relation, edges in cluster_edges.items()]
         return "digraph G { " + "\n".join(cluster_reprs) + ";\n".join(free_edges) + " }"
 
-    def _quote(self, text):
-        return '"{}"'.format(text)
+
+class Parser:
+    spaces = re.compile(r'\s+')
+    groups = re.compile(r'^(.+)\s+\.(\S+)\s+(.+)$')
+    enumerations = re.compile(r'\s*,\s*')
+
+    def parse_relations(self, text):
+        '''Transform text to RelationGraph.
+
+        :param text:
+        :return: RelationGraph object
+        '''
+        relations = RelationGraph()
+
+        for i, rawline in enumerate(text.split('\n')):
+            # cleanup
+            line = rawline.strip()
+            if not len(line) or line.startswith('#'):
+                continue
+            line = self.spaces.sub(' ', line)
+
+            # parse
+            m = self.groups.search(line)
+            if m:
+                f, r, t = m.group(1,2,3)
+                for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
+                    relations.add_relation(Node(fi), r, Node(ti))
+            else:
+                raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))
+
+        return relations
+
+    def parse_to_dot(self, text):
+        relations = self.parse_relations(text)
+        return relations.make_dot()
