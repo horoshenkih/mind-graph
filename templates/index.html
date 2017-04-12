@@ -9,7 +9,18 @@
     <div style='float:left; width:30%'>
         <h2>MindGraph v0</h2>
 
-        <script type=text/javascript>
+        <button id="calculate">Generate graph</button>
+        <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
+    </div>
+
+    <div style='float:left; width:30%'>
+        <p> Graph
+        <p><img id="picture" src=""></img>
+        <p> DOT representation:
+        <p><span id="dot_repr"></span>
+    </div>
+
+    <script type=text/javascript>
         $(function() {
             $('#calculate').bind('click', function() {
                 $.getJSON('/generate_dot', {
@@ -24,35 +35,11 @@
                 return false;
             });
         });
-        </script>
-
-        <button id="calculate">Generate graph</button>
-        <p><textarea name="input_text" cols="40" rows="25">
-# first tree: technologies
-Programming Language, CI .is Technology
-
-Python, C++ .is Programming Language
-Travis .is CI
-
-# second tree: projects
-Data Science .is Project
-xgboost, sklearn .is Data Science
-
-# relations
-xgboost .uses Travis, Python, C++
-sklearn .uses Travis, Python</textarea>
-    </div>
-
-    <div style='float:left; width:30%'>
-        <p> Graph
-        <p><img id="picture" src=""></img>
-        <p> DOT representation:
-        <p><span id="dot_repr"></span>
-    </div>
-
-    <script type=text/javascript>
+        // show pre-loaded data
         $(document).ready(function() {
-            document.getElementById('calculate').click();
+            $('#input_text_area').load("{{ url_for('static', filename='example.txt') }}", function () {
+                document.getElementById('calculate').click();
+            });
         });
     </script>
 </body>
