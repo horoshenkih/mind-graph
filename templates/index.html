@@ -27,7 +27,7 @@
         </script>
 
         <button id="calculate">Generate graph</button>
-        <textarea name="input_text" cols="40" rows="25">
+        <p><textarea name="input_text" cols="40" rows="25">
 # first tree: technologies
 Programming Language, CI .is Technology
 
@@ -49,4 +49,10 @@ sklearn .uses Travis, Python</textarea>
         <p> DOT representation:
         <p><span id="dot_repr"></span>
     </div>
+
+    <script type=text/javascript>
+        $(document).ready(function() {
+            document.getElementById('calculate').click();
+        });
+    </script>
 </body>
