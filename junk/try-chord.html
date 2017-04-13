@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+
+<script src="js/d3.v4.min.js"></script>
+<script src="js/d3.dependencyWheel.js"></script>
+<script src="js/composerBuilder.js"></script>
+
+<div id="chart_placeholder"></div>
+<script>
+
+var data = {
+    packageNames: ['Main', 'A', 'B'],
+    matrix: [
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 0]
+    ]
+};
+
+var chart = d3.chart.dependencyWheel();
+
+d3.select('#chart_placeholder')
+    .datum(data)
+    .call(chart);
+
+</script>
+
+</body>
