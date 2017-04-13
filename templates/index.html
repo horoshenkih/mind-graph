@@ -1,7 +1,17 @@
 <!doctype html>
 <head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="{{ url_for('static', filename='js/lib/viz.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/vis.min.js') }}"></script>
+
+    <style>
+        #mynetwork {
+            width: 700px;
+            height: 500px;
+            border: 1px solid #444444;
+            background-color: #222222;
+        }
+    </style>
+
     <title>MindGraph</title>
 </head>
 
@@ -14,23 +24,25 @@
     </div>
 
     <div style='float:left; width:30%'>
-        <p> Graph
-        <p><img id="picture" src=""></img>
-        <p> DOT representation:
-        <p><span id="dot_repr"></span>
+        <h3>Graph</h3>
+        <p><div id="mynetwork"></div>
     </div>
 
     <script type=text/javascript>
         $(function() {
             $('#calculate').bind('click', function() {
-                $.getJSON('/generate_dot', {
+                $.getJSON('/draw_graph', {
                     input_text: $('textarea[name="input_text"]').val()
                 }, function(data) {
                     $("#dot_repr").text(data.dot_repr);
-                    var image = Viz.svgXmlToPngImageElement(Viz(data.dot_repr));
-                    image.onload = function() {
-                        document.getElementById("picture").src = image.src;
+                    var parsed_data = vis.network.convertDot(data.dot_repr);
+                    var graph_data = {
+                        nodes: parsed_data.nodes,
+                        edges: parsed_data.edges
                     };
+                    var container = document.getElementById('mynetwork');
+                    var options = {};
+                    var network = new vis.Network(container, graph_data, options);
                 });
                 return false;
             });

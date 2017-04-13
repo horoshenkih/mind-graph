@@ -7,17 +7,20 @@ from mindgraph.parser import Parser
 app = Flask(__name__)
 ps = Parser()
 
+
 @app.route('/')
 def index(name=None):
     return render_template('index.html')
 
-@app.route('/generate_dot')
+
+@app.route('/draw_graph')
 def generate_dot(methods=["GET"]):
     text = request.args.get('input_text', "", type=str)
     app.logger.info("GOT: " + text)
-    dot_repr = ps.parse_to_dot(text)
+    dot_repr = ps.parse_to_dot(text, clusters=False)
 
     return jsonify(dot_repr=dot_repr)
+
 
 # run locally
 if __name__ == '__main__':

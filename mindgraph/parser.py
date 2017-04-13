@@ -47,7 +47,7 @@ class RelationGraph:
     def get_nodes(self):
         return self._nodes.keys()
 
-    def make_dot(self):
+    def make_dot(self, clusters=True):
         rel_edges = []  # (relation, edges), (relation, edges), ...
         for relation, graph in self._rgraphs.items():
             for component in nx.connected_components(graph):
@@ -64,7 +64,7 @@ class RelationGraph:
                     edge_reprs.append(self._arc_repr(edge[0], edge[1], attributes))
                 rel_edges.append([relation, edge_reprs])
 
-        return self._rel_edges_to_dot(rel_edges)
+        return self._rel_edges_to_dot(rel_edges, clusters)
 
     def _quote(self, text):
         return '"{}"'.format(text)
@@ -78,13 +78,13 @@ class RelationGraph:
             attributes_repr = ",".join([str(k) + '=' + str(v) for k, v in attributes.items()])
             return "{} -> {} [{}]".format(qv1, qv2, attributes_repr)
 
-    def _rel_edges_to_dot(self, rel_edges):
+    def _rel_edges_to_dot(self, rel_edges, clusters=True):
         # 'is' relations separated to subgraphs
         free_edges = []
         cluster_edges = dict()
         i=0
         for relation, edges in rel_edges:
-            if relation.startswith('is'):
+            if relation.startswith('is') and clusters:
                 cluster_edges[relation+str(i)] = edges[:]
                 i += 1
             else:
@@ -124,6 +124,6 @@ class Parser:
 
         return relations
 
-    def parse_to_dot(self, text):
+    def parse_to_dot(self, text, clusters=True):
         relations = self.parse_relations(text)
-        return relations.make_dot()
+        return relations.make_dot(clusters)
