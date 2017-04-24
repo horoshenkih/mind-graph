@@ -28,10 +28,13 @@ class RelationGraph:
     def add_relation(self, node1, relation, node2):
         # for each node set first set of not None attributes
         for n in (node1, node2):
-            if self._nodes.get(n.name) is None and n.attributes is not None:
-                self._nodes[n.name] = n.attributes
-            else:
-                self._nodes[n.name] = None
+            if self._nodes.get(n.name) is None:
+                if n.attributes is not None:
+                    self._nodes[n.name] = n.attributes
+                else:
+                    self._nodes[n.name] = None
+            elif n.attributes is not None:
+                self._nodes[n.name].update(n.attributes)
 
         self._rgraphs[relation].add_edge(node1.name, node2.name, relation=relation)
 
@@ -117,7 +120,7 @@ class Parser:
 
     vertex_with_attributes = re.compile(r'''
         ^
-        ([^\[\]]+)          # vertex
+        ([^\[\]]+?)         # vertex
         \s*
         (\[[^\[\]]+\])?     # optional attributes in square brackets
         $
