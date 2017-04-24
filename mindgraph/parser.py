@@ -47,6 +47,15 @@ class RelationGraph:
     def get_nodes(self):
         return self._nodes.keys()
 
+    def get_node_attribute(self, nodename, attrname):
+        attrs = self._nodes.get(nodename)
+        if attrs is None:
+            return None
+        elif type(attrs) == dict:
+            return attrs.get(attrname)
+        else:
+            raise RuntimeError("Wrong type of attributes of node {}".format(nodename))
+
     def make_dot(self, clusters=True):
         rel_edges = []  # (relation, edges), (relation, edges), ...
         for relation, graph in self._rgraphs.items():
@@ -95,8 +104,50 @@ class RelationGraph:
 
 class Parser:
     spaces = re.compile(r'\s+')
-    groups = re.compile(r'^(.+)\s+\.(\S+)\s+(.+)$')
+    groups = re.compile(r'''
+        ^
+        (.+)        # first vertex
+        \s+
+        \.(\S+)     # relation (single word starting with dot)
+        \s+
+        (.+)        # second vertex
+        $
+        ''', re.X)
     enumerations = re.compile(r'\s*,\s*')
+
+    vertex_with_attributes = re.compile(r'''
+        ^
+        ([^\[\]]+)          # vertex
+        \s*
+        (\[[^\[\]]+\])?     # optional attributes in square brackets
+        $
+    ''', re.X)
+
+    attributes_split = re.compile(r'\s*;\s*')
+    one_attribute_split = re.compile(r'\s*=\s*')
+
+    def __init__(self, unique_attributes=['text'], multiple_attributes = ['tag', 'url', 'note']):
+        self._unique_attributes = set(unique_attributes)
+        self._multiple_attributes = set(multiple_attributes)
+        if not self._unique_attributes.isdisjoint(self._multiple_attributes):
+            raise ValueError("Sets with unique and multiple attributes must not overlap")
+
+    def _parse_attributes(self, attributes_text):
+        if attributes_text is None:
+            return None
+        attributes_text = re.sub(r'^\[|\]$', repl='', string=attributes_text)
+
+        attributes = dict()
+        for kv in self.attributes_split.split(attributes_text):
+            k, v = self.one_attribute_split.split(kv, maxsplit=1)
+            if k in self._unique_attributes:
+                attributes[k] = v
+            elif k in self._multiple_attributes:
+                if k in attributes:
+                    attributes[k].append(v)
+                else:
+                    attributes[k] = [v,]
+        return attributes
 
     def parse_relations(self, text):
         '''Transform text to RelationGraph.
@@ -118,7 +169,11 @@ class Parser:
             if m:
                 f, r, t = m.group(1,2,3)
                 for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
-                    relations.add_relation(Node(fi), r, Node(ti))
+                    fi, attr_fi_str = self.vertex_with_attributes.search(fi).group(1,2)
+                    ti, attr_ti_str = self.vertex_with_attributes.search(ti).group(1,2)
+                    attr_fi = self._parse_attributes(attr_fi_str)
+                    attr_ti = self._parse_attributes(attr_ti_str)
+                    relations.add_relation(Node(fi, attr_fi), r, Node(ti, attr_ti))
             else:
                 raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))
 

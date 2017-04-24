@@ -59,3 +59,21 @@ class TestParser:
     def test_simple_nodes(self):
         rg = self.get_simple_relation_graph()
         assert set(rg.get_nodes()) == {'A', 'B', 'A 1', 'A 2', 'B 1', 'B 2', 'B 3'}
+
+    @pytest.fixture()
+    def get_graph_with_node_attributes(self):
+        text = """
+            A[text=Node A; note=A note 1; note=A note 2] .relatedTo B[text=Node B]
+        """
+        ps = Parser()
+        return ps.parse_relations(text)
+
+    def test_node_attributes(self):
+        rg = self.get_graph_with_node_attributes()
+
+        assert set(rg.get_nodes()) == {'A', 'B'}
+        assert_relations_sets(rg, 'A', 'B', ['relatedTo'])
+
+        assert rg.get_node_attribute('A', 'text') == 'Node A'
+        assert set(rg.get_node_attribute('A', 'note')) == {'A note 1', 'A note 2'}
+        assert rg.get_node_attribute('B', 'text') == 'Node B'
