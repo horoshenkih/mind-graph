@@ -19,8 +19,6 @@ class Node:
 
 
 class RelationGraph:
-    COLORS = ['blue', 'green', 'red']
-
     def __init__(self):
         self._rgraphs = defaultdict(nx.Graph)  # {relation_name: rgaph}
         self._nodes = dict()  # {name: attributes}
@@ -50,8 +48,11 @@ class RelationGraph:
     def get_nodes(self):
         return self._nodes.keys()
 
+    def get_node_attributes(self, nodename):
+        return self._nodes.get(nodename)
+
     def get_node_attribute(self, nodename, attrname):
-        attrs = self._nodes.get(nodename)
+        attrs = self.get_node_attributes(nodename)
         if attrs is None:
             return None
         elif type(attrs) == dict:
@@ -59,22 +60,47 @@ class RelationGraph:
         else:
             raise RuntimeError("Wrong type of attributes of node {}".format(nodename))
 
-    def make_dot(self, clusters=True):
-        rel_edges = []  # (relation, edges), (relation, edges), ...
+    def represent(self):
+        '''Get representation of graph as list of dicts.
+        Each dict has the following structure:
+        {
+            'attributes': {'relation': relation_name, attr1: val1, ...},
+            'nodes': {node1: node_attrs1, node2: node_attrs2, ...}
+            'edges': {(node11, node12): edge_attrs1, (node21, node22): edge_attrs2, ...}
+        }
+        If bool(['attributes']['is_directed']) == False, then nodes in each edge are sorted in lexicografic order.
+
+        :return: list of dicts
+        '''
+
+        representation = []
+
         for relation, graph in self._rgraphs.items():
             for component in nx.connected_components(graph):
+                graph_dict = {'attributes': {'relation': relation}, 'nodes': dict(), 'edges': dict()}
+
+                for node in component:
+                    graph_dict['nodes'][node] = self.get_node_attributes(node)
                 subgraph = graph.subgraph(component)
-                edges = subgraph.edges()
+                edges = subgraph.edges(data=True)  # with attributes
 
-                edge_reprs = []
                 for edge in edges:
-                    color = self.COLORS[hash(relation) % len(self.COLORS)]
-                    attributes = {'color': color}
+                    v1, v2, attrs = edge
+                    graph_dict['edges'][(v1, v2)] = attrs
+                representation.append(graph_dict)
 
-                    if relation.startswith('is'):
-                        attributes['dir'] = 'none'
-                    edge_reprs.append(self._arc_repr(edge[0], edge[1], attributes))
-                rel_edges.append([relation, edge_reprs])
+        return representation
+
+    def make_dot(self, clusters=True):
+        rel_edges = []  # (relation, edges), (relation, edges), ...
+        for component in self.represent():
+            relation = component['attributes'].get('relation')
+            edges = component['edges'].keys()
+
+            edge_reprs = []
+            for edge in edges:
+                edge_reprs.append(self._arc_repr(edge[0], edge[1]))
+            rel_edges.append([relation, edge_reprs])
 
         return self._rel_edges_to_dot(rel_edges, clusters)
 

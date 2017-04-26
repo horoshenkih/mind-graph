@@ -1,6 +1,7 @@
 import pytest
+from collections import Counter
 
-from ..parser import Parser, RelationGraph
+from ..parser import Parser, RelationGraph, Node
 
 
 def assert_relations_sets(rg, node1, node2, expected_relations):
@@ -79,3 +80,24 @@ class TestParser:
         assert rg.get_node_attribute('A', 'text') == 'Node A'
         assert set(rg.get_node_attribute('A', 'note')) == {'A note 1', 'A note 2'}
         assert rg.get_node_attribute('B', 'text') == 'Node B'
+
+
+class TestRelationGraph:
+    @pytest.fixture()
+    def get_simple_graph(self):
+        rg = RelationGraph()
+        rg.add_relation(Node(1), 'r1', Node(2))
+        rg.add_relation(Node(1), 'r1', Node(3))
+        rg.add_relation(Node(1), 'r2', Node(4))
+        rg.add_relation(Node(10), 'r1', Node(11))
+        return rg
+
+    def test_representation_clusters(self):
+        rg = self.get_simple_graph()
+        repr = rg.represent()
+
+        count_relations = Counter()
+        for g in repr:
+            count_relations[g['attributes']['relation']] += 1
+        assert count_relations['r1'] == 2
+        assert count_relations['r2'] == 1
