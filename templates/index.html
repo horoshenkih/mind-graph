@@ -31,15 +31,35 @@
     <script type=text/javascript>
         $(function() {
             $('#calculate').bind('click', function() {
-                $.getJSON('/draw_graph', {
+                $.getJSON('/get_graph', {
                     input_text: $('textarea[name="input_text"]').val()
-                }, function(data) {
-                    $("#dot_repr").text(data.dot_repr);
-                    var parsed_data = vis.network.convertDot(data.dot_repr);
+                }, function(input_data) {
+                    var COLORS = ['red', 'blue', 'green'];
+                    var clusters = input_data.repr;
                     var graph_data = {
-                        nodes: parsed_data.nodes,
-                        edges: parsed_data.edges
+                        nodes: [],
+                        edges: []
                     };
+                    var seen_nodes = {};
+                    for (i_cluster in clusters) {
+                        data = clusters[i_cluster];
+                        for (node in data.nodes) {
+                            if (seen_nodes[node] != 1) {
+                                graph_data.nodes.push({'id': node, 'label': node});
+                                seen_nodes[node] = 1;
+                            }
+                        }
+                        for (from in data.edges) {
+                            for (to in data.edges[from]) {
+                                var attrs = data.edges[from][to];
+                                var edge_obj = {'from': from, 'to': to, 'color': COLORS[i_cluster % COLORS.length]};
+                                if (attrs.hier) {
+                                    edge_obj.arrows = 'to';
+                                }
+                                graph_data.edges.push(edge_obj);
+                            }
+                        }
+                    }
                     var container = document.getElementById('mynetwork');
                     var options = {};
                     var network = new vis.Network(container, graph_data, options);

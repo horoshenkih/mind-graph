@@ -20,10 +20,10 @@ class Node:
 
 class RelationGraph:
     def __init__(self):
-        self._rgraphs = defaultdict(nx.Graph)  # {relation_name: rgaph}
+        self._rgraphs = defaultdict(nx.DiGraph)  # {relation_name: rgaph}
         self._nodes = dict()  # {name: attributes}
 
-    def add_relation(self, node1, relation, node2):
+    def add_relation(self, node1, relation, node2, attributes={}):
         # for each node set first set of not None attributes
         for n in (node1, node2):
             if self._nodes.get(n.name) is None:
@@ -34,7 +34,7 @@ class RelationGraph:
             elif n.attributes is not None:
                 self._nodes[n.name].update(n.attributes)
 
-        self._rgraphs[relation].add_edge(node1.name, node2.name, relation=relation)
+        self._rgraphs[relation].add_edge(node1.name, node2.name, relation=relation, **attributes)
 
     def get_relations(self, name1, name2):
         all_relations = []
@@ -66,7 +66,7 @@ class RelationGraph:
         {
             'attributes': {'relation': relation_name, attr1: val1, ...},
             'nodes': {node1: node_attrs1, node2: node_attrs2, ...}
-            'edges': {(node11, node12): edge_attrs1, (node21, node22): edge_attrs2, ...}
+            'edges': {{node1: {node12, edge_attrs1}, node13: edge_attrs2, ...}, ...}
         }
         If bool(['attributes']['is_directed']) == False, then nodes in each edge are sorted in lexicografic order.
 
@@ -76,7 +76,9 @@ class RelationGraph:
         representation = []
 
         for relation, graph in self._rgraphs.items():
-            for component in nx.connected_components(graph):
+            undirected = nx.Graph()
+            undirected.add_edges_from(graph.edges())
+            for component in nx.connected_components(undirected):
                 graph_dict = {'attributes': {'relation': relation}, 'nodes': dict(), 'edges': dict()}
 
                 for node in component:
@@ -86,49 +88,12 @@ class RelationGraph:
 
                 for edge in edges:
                     v1, v2, attrs = edge
-                    graph_dict['edges'][(v1, v2)] = attrs
+                    if v1 not in graph_dict['edges']:
+                        graph_dict['edges'][v1] = {}
+                    graph_dict['edges'][v1][v2] = attrs
                 representation.append(graph_dict)
 
         return representation
-
-    def make_dot(self, clusters=True):
-        rel_edges = []  # (relation, edges), (relation, edges), ...
-        for component in self.represent():
-            relation = component['attributes'].get('relation')
-            edges = component['edges'].keys()
-
-            edge_reprs = []
-            for edge in edges:
-                edge_reprs.append(self._arc_repr(edge[0], edge[1]))
-            rel_edges.append([relation, edge_reprs])
-
-        return self._rel_edges_to_dot(rel_edges, clusters)
-
-    def _quote(self, text):
-        return '"{}"'.format(text)
-
-    def _arc_repr(self, v1, v2, attributes=None):
-        qv1 = self._quote(v1)
-        qv2 = self._quote(v2)
-        if attributes is None:
-            return "{} -> {}".format(qv1, qv2)
-        else:
-            attributes_repr = ",".join([str(k) + '=' + str(v) for k, v in attributes.items()])
-            return "{} -> {} [{}]".format(qv1, qv2, attributes_repr)
-
-    def _rel_edges_to_dot(self, rel_edges, clusters=True):
-        # 'is' relations separated to subgraphs
-        free_edges = []
-        cluster_edges = dict()
-        i=0
-        for relation, edges in rel_edges:
-            if relation.startswith('is') and clusters:
-                cluster_edges[relation+str(i)] = edges[:]
-                i += 1
-            else:
-                free_edges += edges
-        cluster_reprs = [" subgraph cluster_"+relation + " {\n" + ";\n".join(edges) + "}\n" for relation, edges in cluster_edges.items()]
-        return "digraph G { " + "\n".join(cluster_reprs) + ";\n".join(free_edges) + " }"
 
 
 class Parser:
@@ -202,11 +167,19 @@ class Parser:
                     ti, attr_ti_str = self.vertex_with_attributes.search(ti).group(1,2)
                     attr_fi = self._parse_attributes(attr_fi_str)
                     attr_ti = self._parse_attributes(attr_ti_str)
-                    relations.add_relation(Node(fi, attr_fi), r, Node(ti, attr_ti))
+
+                    edge_attributes = {}
+                    if r.startswith('is'):
+                        edge_attributes['hier'] = True
+                    relations.add_relation(Node(fi, attr_fi), r, Node(ti, attr_ti), edge_attributes)
             else:
                 raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))
 
         return relations
+
+    def parse_to_list(self, text):
+        relations = self.parse_relations(text)
+        return relations.represent()
 
     def parse_to_dot(self, text, clusters=True):
         relations = self.parse_relations(text)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template, request, jsonify
+import json
 
 from mindgraph.parser import Parser
 
@@ -13,13 +14,13 @@ def index(name=None):
     return render_template('index.html')
 
 
-@app.route('/draw_graph')
-def generate_dot(methods=["GET"]):
+@app.route('/get_graph')
+def get_graph(methods=["GET"]):
     text = request.args.get('input_text', "", type=str)
     app.logger.info("GOT: " + text)
-    dot_repr = ps.parse_to_dot(text, clusters=False)
+    repr = ps.parse_to_list(text)
 
-    return jsonify(dot_repr=dot_repr)
+    return jsonify(repr=repr)
 
 
 # run locally

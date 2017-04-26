@@ -86,9 +86,10 @@ class TestRelationGraph:
     @pytest.fixture()
     def get_simple_graph(self):
         rg = RelationGraph()
-        rg.add_relation(Node(1), 'r1', Node(2))
-        rg.add_relation(Node(1), 'r1', Node(3))
-        rg.add_relation(Node(1), 'r2', Node(4))
+        n1 = Node(1, {'text': 'Node 1'})
+        rg.add_relation(n1, 'r1', Node(2))
+        rg.add_relation(n1, 'r1', Node(3))
+        rg.add_relation(n1, 'r2', Node(4))
         rg.add_relation(Node(10), 'r1', Node(11))
         return rg
 
@@ -101,3 +102,20 @@ class TestRelationGraph:
             count_relations[g['attributes']['relation']] += 1
         assert count_relations['r1'] == 2
         assert count_relations['r2'] == 1
+
+    def test_representation_nodes(self):
+        rg = self.get_simple_graph()
+        repr = rg.represent()
+        all_nodes = set()
+
+        # test attributes
+        for g in repr:
+            for node in g['nodes']:
+                all_nodes.add(node)
+                if node == 1:
+                    assert g['nodes'][node] == {'text': 'Node 1'}
+                else:
+                    assert g['nodes'][node] is None
+
+        # test node set
+        assert all_nodes == {1,2,3,4,10,11}
