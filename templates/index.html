@@ -25,7 +25,7 @@
 
             <input type="radio" name="select_source" value="url" checked>URL<br>
             <a href="https://sites.google.com/site/gdocs2direct/">converter for Google Drive</a><br>
-            <input type="text" size="40" name="input_url" value="http://127.0.0.1:8080/static/example.txt"><br>
+            <input type="text" size="40" name="input_url" value="{{ url_for('static', filename='example.txt') }}"><br>
 
             <input type="radio" name="select_source" value="text">Text:<br>
             <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
