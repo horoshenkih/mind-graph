@@ -19,8 +19,17 @@
     <div style='float:left; width:30%'>
         <h2>MindGraph v0</h2>
 
-        <button id="calculate">Generate graph</button>
-        <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
+        <!--<button id="calculate">Generate graph</button>-->
+        <form name="myform"><div id="select_source"><br>
+            <input type="submit" id="calculate" value="Generate graph"><br>
+
+            <input type="radio" name="select_source" value="url">URL<br>
+            <a href="https://sites.google.com/site/gdocs2direct/">converter for Google Drive</a><br>
+            <input type="text" size="40" name="input_url"><br>
+
+            <input type="radio" name="select_source" value="text" checked>Text:<br>
+            <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
+        </div></form>
     </div>
 
     <div style='float:left; width:30%'>
@@ -31,8 +40,33 @@
     <script type=text/javascript>
         $(function() {
             $('#calculate').bind('click', function() {
+                var selected_type = $("input[type='radio'][name='select_source']:checked").val();
+                var input_text;
+
+                if (selected_type === 'text') {
+                    input_text = $('textarea[name="input_text"]').val();
+                } else {
+                    var input_url = $('input[type="text"][name="input_url"]').val();
+                    console.log(input_url);
+
+                    var XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
+                    var xhr = new XHR();
+
+                    xhr.open('GET', input_url, true);
+
+                    xhr.onload = function() {
+                        input_text = xhr.responseText;
+                    }
+
+                    xhr.onerror = function() {
+                        alert( 'Ошибка ' + this.status );
+                    }
+
+                    xhr.send();
+                }
+
                 $.getJSON('/get_graph', {
-                    input_text: $('textarea[name="input_text"]').val()
+                    input_text: input_text
                 }, function(input_data) {
                     var COLORS = ['red', 'blue', 'green'];
                     var clusters = input_data.repr;
