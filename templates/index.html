@@ -42,7 +42,7 @@
             $('#calculate').bind('click', function() {
 
             var create_network = function(input_data) {
-                    var COLORS = ['red', 'blue', 'green'];
+                    var COLORS = ['#915C83', '#7CB9E8', '#B0BF1A'];
                     var clusters = input_data.repr;
                     var graph_data = {
                         nodes: [],
@@ -51,16 +51,17 @@
                     var seen_nodes = {};
                     for (i_cluster in clusters) {
                         data = clusters[i_cluster];
+                        color = COLORS[i_cluster % COLORS.length];
                         for (node in data.nodes) {
                             if (seen_nodes[node] != 1) {
-                                graph_data.nodes.push({'id': node, 'label': node});
+                                graph_data.nodes.push({'id': node, 'label': node, 'color': color});
                                 seen_nodes[node] = 1;
                             }
                         }
                         for (from in data.edges) {
                             for (to in data.edges[from]) {
                                 var attrs = data.edges[from][to];
-                                var edge_obj = {'from': from, 'to': to, 'color': COLORS[i_cluster % COLORS.length]};
+                                var edge_obj = {'from': from, 'to': to, 'color': color};
                                 if (attrs.layout === 'tree') {
                                     edge_obj.arrows = 'to';
                                 }
