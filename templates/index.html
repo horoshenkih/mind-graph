@@ -8,7 +8,7 @@
             width: 700px;
             height: 500px;
             border: 1px solid #444444;
-            background-color: #222222;
+            background-color: #FFFFFF;
         }
     </style>
 
@@ -24,7 +24,6 @@
             <input type="submit" id="calculate" value="Generate graph"><br>
 
             <input type="radio" name="select_source" value="url" checked>URL<br>
-            <a href="https://sites.google.com/site/gdocs2direct/">converter for Google Drive</a><br>
             <input type="text" size="40" name="input_url" value="{{ url_for('static', filename='example.txt') }}"><br>
 
             <input type="radio" name="select_source" value="text">Text:<br>
@@ -42,7 +41,7 @@
             $('#calculate').bind('click', function() {
 
             var create_network = function(input_data) {
-                    var COLORS = ['#915C83', '#7CB9E8', '#B0BF1A'];
+                    var COLORS = ['#F19CBB', '#7CB9E8', '#B0BF1A'];
                     var clusters = input_data.repr;
                     var graph_data = {
                         nodes: [],
@@ -54,7 +53,7 @@
                         color = COLORS[i_cluster % COLORS.length];
                         for (node in data.nodes) {
                             if (seen_nodes[node] != 1) {
-                                var node_obj = {'id': node, 'label': node, 'color': color};
+                                var node_obj = {'id': node, 'label': node, 'shape': 'box', 'color': color};
                                 if (data.nodes[node]['is_root']) {
                                     node_obj.mass = 2;
                                     node_obj.font = {'size': 20};
