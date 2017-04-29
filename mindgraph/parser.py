@@ -84,10 +84,13 @@ class RelationGraph:
                 for node in component:
                     graph_dict['nodes'][node] = self.get_node_attributes(node)
                 subgraph = graph.subgraph(component)
+                is_tree = nx.is_tree(subgraph)
                 edges = subgraph.edges(data=True)  # with attributes
 
                 for edge in edges:
                     v1, v2, attrs = edge
+                    if is_tree:
+                        attrs['layout'] = 'tree'
                     if v1 not in graph_dict['edges']:
                         graph_dict['edges'][v1] = {}
                     graph_dict['edges'][v1][v2] = attrs
@@ -168,9 +171,7 @@ class Parser:
                     attr_fi = self._parse_attributes(attr_fi_str)
                     attr_ti = self._parse_attributes(attr_ti_str)
 
-                    edge_attributes = {}
-                    if r.startswith('is'):
-                        edge_attributes['hier'] = True
+                    edge_attributes = {}  # TODO
                     relations.add_relation(Node(fi, attr_fi), r, Node(ti, attr_ti), edge_attributes)
             else:
                 raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))

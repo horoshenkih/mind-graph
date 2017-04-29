@@ -61,7 +61,7 @@
                             for (to in data.edges[from]) {
                                 var attrs = data.edges[from][to];
                                 var edge_obj = {'from': from, 'to': to, 'color': COLORS[i_cluster % COLORS.length]};
-                                if (attrs.hier) {
+                                if (attrs.layout === 'tree') {
                                     edge_obj.arrows = 'to';
                                 }
                                 graph_data.edges.push(edge_obj);
