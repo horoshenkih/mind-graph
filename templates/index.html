@@ -54,7 +54,12 @@
                         color = COLORS[i_cluster % COLORS.length];
                         for (node in data.nodes) {
                             if (seen_nodes[node] != 1) {
-                                graph_data.nodes.push({'id': node, 'label': node, 'color': color});
+                                var node_obj = {'id': node, 'label': node, 'color': color};
+                                if (data.nodes[node]['is_root']) {
+                                    node_obj.mass = 2;
+                                    node_obj.font = {'size': 20};
+                                };
+                                graph_data.nodes.push(node_obj);
                                 seen_nodes[node] = 1;
                             }
                         }

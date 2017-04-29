@@ -49,7 +49,11 @@ class RelationGraph:
         return self._nodes.keys()
 
     def get_node_attributes(self, nodename):
-        return self._nodes.get(nodename)
+        attrs = self._nodes.get(nodename)
+        if attrs is None:
+            return {}
+        else:
+            return attrs
 
     def get_node_attribute(self, nodename, attrname):
         attrs = self.get_node_attributes(nodename)
@@ -81,10 +85,17 @@ class RelationGraph:
             for component in nx.connected_components(undirected):
                 graph_dict = {'attributes': {'relation': relation}, 'nodes': dict(), 'edges': dict()}
 
-                for node in component:
-                    graph_dict['nodes'][node] = self.get_node_attributes(node)
                 subgraph = graph.subgraph(component)
                 is_tree = nx.is_tree(subgraph)
+                root_node = None
+                if is_tree:
+                    root_node = [n for n, d in subgraph.out_degree().items() if d == 0][0]
+
+                for node in component:
+                    node_attrs = self.get_node_attributes(node)
+                    if is_tree and node == root_node:
+                        node_attrs['is_root'] = True
+                    graph_dict['nodes'][node] = node_attrs
                 edges = subgraph.edges(data=True)  # with attributes
 
                 for edge in edges:
