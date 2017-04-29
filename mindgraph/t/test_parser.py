@@ -105,7 +105,7 @@ class TestRelationGraph:
 
     def test_representation_nodes(self):
         rg = self.get_simple_graph()
-        repr = rg.represent()
+        repr = rg.represent(analyze_graph=False)  # do not add attributes
         all_nodes = set()
 
         # test attributes
@@ -115,7 +115,7 @@ class TestRelationGraph:
                 if node == 1:
                     assert g['nodes'][node] == {'text': 'Node 1'}
                 else:
-                    assert g['nodes'][node] is None
+                    assert not g['nodes'][node]
 
         # test node set
         assert all_nodes == {1,2,3,4,10,11}

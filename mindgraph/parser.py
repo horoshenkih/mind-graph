@@ -64,7 +64,7 @@ class RelationGraph:
         else:
             raise RuntimeError("Wrong type of attributes of node {}".format(nodename))
 
-    def represent(self):
+    def represent(self, analyze_graph=True):
         '''Get representation of graph as list of dicts.
         Each dict has the following structure:
         {
@@ -86,14 +86,16 @@ class RelationGraph:
                 graph_dict = {'attributes': {'relation': relation}, 'nodes': dict(), 'edges': dict()}
 
                 subgraph = graph.subgraph(component)
-                is_tree = nx.is_tree(subgraph)
+                is_tree = False
+                if analyze_graph:
+                    is_tree = nx.is_tree(subgraph)
                 root_node = None
-                if is_tree:
+                if analyze_graph and is_tree:
                     root_node = [n for n, d in subgraph.out_degree().items() if d == 0][0]
 
                 for node in component:
                     node_attrs = self.get_node_attributes(node)
-                    if is_tree and node == root_node:
+                    if analyze_graph and is_tree and node == root_node:
                         node_attrs['is_root'] = True
                     graph_dict['nodes'][node] = node_attrs
                 edges = subgraph.edges(data=True)  # with attributes
