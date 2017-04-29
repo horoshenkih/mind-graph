@@ -62,10 +62,11 @@
                                     'id': node,
                                     'label': label,
                                     'shape': 'box',
-                                    'color': color
+                                    'color': color,
+                                    'mass': 2
                                 };
                                 if (data.nodes[node]['is_root']) {
-                                    node_obj.mass = 2;
+                                    node_obj.mass *= 2;
                                     node_obj.font = {'size': 20};
                                 };
                                 graph_data.nodes.push(node_obj);
