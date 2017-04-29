@@ -6,7 +6,7 @@
     <style>
         #mynetwork {
             width: 700px;
-            height: 500px;
+            height: 400px;
             border: 1px solid #444444;
             background-color: #FFFFFF;
         }
@@ -34,6 +34,7 @@
     <div style='float:left; width:30%'>
         <h3>Graph</h3>
         <p><div id="mynetwork"></div>
+        <p><div id="info"></div>
     </div>
 
     <script type=text/javascript>
@@ -52,14 +53,19 @@
                         data = clusters[i_cluster];
                         color = COLORS[i_cluster % COLORS.length];
                         for (node in data.nodes) {
-                            if (seen_nodes[node] != 1) {
-                                var node_obj = {'id': node, 'label': node, 'shape': 'box', 'color': color};
+                            if (!seen_nodes[node]) {
+                                var node_obj = {
+                                    'id': node,
+                                    'label': node,
+                                    'shape': 'box',
+                                    'color': color
+                                };
                                 if (data.nodes[node]['is_root']) {
                                     node_obj.mass = 2;
                                     node_obj.font = {'size': 20};
                                 };
                                 graph_data.nodes.push(node_obj);
-                                seen_nodes[node] = 1;
+                                seen_nodes[node] = data.nodes[node];
                             }
                         }
                         for (from in data.edges) {
@@ -76,6 +82,25 @@
                     var container = document.getElementById('mynetwork');
                     var options = {};
                     var network = new vis.Network(container, graph_data, options);
+
+                    network.on("selectNode", function(params) {
+                        var node = params.nodes[0];
+                        console.log(node);
+                        var attrs = seen_nodes[node];
+
+                        var urls_html = "";
+                        for (i_html in attrs.url) {
+                            var url = attrs.url[i_html];
+                            urls_html += "<a href="+url+">"+url+"</a><p>";
+                         }
+
+                         var note_html = "";
+                         for (i_note in attrs.note) {
+                            var note = attrs.note[i_note];
+                            note_html += note + "<p>";
+                         }
+                         document.getElementById("info").innerHTML = "<h4>'"+node+"' info:</h4>" + urls_html + "<p>" + note_html;
+                    });
                 };
 
                 var input_text;
