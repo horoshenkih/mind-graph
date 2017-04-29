@@ -136,7 +136,7 @@ class Parser:
     attributes_split = re.compile(r'\s*;\s*')
     one_attribute_split = re.compile(r'\s*=\s*')
 
-    def __init__(self, unique_attributes=['text'], multiple_attributes = ['tag', 'url', 'note']):
+    def __init__(self, unique_attributes=['text'], multiple_attributes = ['url', 'note']):
         self._unique_attributes = set(unique_attributes)
         self._multiple_attributes = set(multiple_attributes)
         if not self._unique_attributes.isdisjoint(self._multiple_attributes):

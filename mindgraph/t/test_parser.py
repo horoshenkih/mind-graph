@@ -64,7 +64,7 @@ class TestParser:
     @pytest.fixture()
     def get_graph_with_node_attributes(self):
         text = """
-            A [text=Node A; note=A note 1; note=A note 2] .relatedTo B[text=Node B]
+            A [text=Node A; note=A note 1; note=A note 2] .relatedTo B[text=NodeB]
             A .relatedTo C
         """
         ps = Parser()
@@ -79,7 +79,7 @@ class TestParser:
 
         assert rg.get_node_attribute('A', 'text') == 'Node A'
         assert set(rg.get_node_attribute('A', 'note')) == {'A note 1', 'A note 2'}
-        assert rg.get_node_attribute('B', 'text') == 'Node B'
+        assert rg.get_node_attribute('B', 'text') == 'NodeB'
 
 
 class TestRelationGraph:

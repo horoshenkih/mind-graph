@@ -54,9 +54,13 @@
                         color = COLORS[i_cluster % COLORS.length];
                         for (node in data.nodes) {
                             if (!seen_nodes[node]) {
+                                var node_attrs = data.nodes[node];
+                                //console.log(node_attrs);
+                                var label = node_attrs.text || node;
+                                //console.log(label);
                                 var node_obj = {
                                     'id': node,
-                                    'label': node,
+                                    'label': label,
                                     'shape': 'box',
                                     'color': color
                                 };
@@ -65,7 +69,7 @@
                                     node_obj.font = {'size': 20};
                                 };
                                 graph_data.nodes.push(node_obj);
-                                seen_nodes[node] = data.nodes[node];
+                                seen_nodes[node] = node_attrs;
                             }
                         }
                         for (from in data.edges) {
@@ -85,7 +89,6 @@
 
                     network.on("selectNode", function(params) {
                         var node = params.nodes[0];
-                        console.log(node);
                         var attrs = seen_nodes[node];
 
                         var urls_html = "";
@@ -111,7 +114,6 @@
                     $.getJSON('/get_graph', { input_text: input_text }, create_network);
                 } else {
                     var input_url = $('input[type="text"][name="input_url"]').val();
-                    console.log(input_url);
 
                     var XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
                     var xhr = new XHR();
