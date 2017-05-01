@@ -13,25 +13,30 @@ var mindGraph = {
         };
         var seen_nodes = {};
         for (i_cluster in clusters) {
-            data = clusters[i_cluster];
-            color = mindGraph.COLORS[i_cluster % mindGraph.COLORS.length];
+            var data = clusters[i_cluster];
+            var color = mindGraph.COLORS[i_cluster % mindGraph.COLORS.length];
             for (node in data.nodes) {
                 if (!seen_nodes[node]) {
                     var node_attrs = data.nodes[node];
-                    //console.log(node_attrs);
                     var label = node_attrs.text || node;
-                    //console.log(label);
+
+                    // Node without additional information is white
+                    var node_color = '#FFFFFF';
+
+                    if (node_attrs.url || node_attrs.note) {
+                        node_color = color;
+                    }
                     var node_obj = {
                         'id': node,
                         'label': label,
                         'shape': 'box',
-                        'color': color,
+                        'color': node_color,
                         'mass': 2
                     };
                     if (data.nodes[node]['is_root']) {
                         node_obj.mass *= 2;
                         node_obj.font = {'size': 20};
-                    };
+                    }
                     graph_data.nodes.push(node_obj);
                     seen_nodes[node] = node_attrs;
                 }
@@ -68,5 +73,6 @@ var mindGraph = {
             }
             document.getElementById(nodeInfoElementId).innerHTML = "<h4>'"+node+"' info:</h4>" + urls_html + "<p>" + note_html;
         });
+        return true;
     }
-}
+};
