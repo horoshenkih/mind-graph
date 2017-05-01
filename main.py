@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template, request, jsonify
-import json
 
-from mindgraph.parser import Parser
+from organon.parser import Parser
 
 app = Flask(__name__)
 ps = Parser()
