@@ -2,6 +2,7 @@
 <head>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/lib/vis.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/mindgraph.js') }}"></script>
 
     <style>
         #mynetwork {
@@ -19,14 +20,13 @@
     <div style='float:left; width:30%'>
         <h2>MindGraph v0</h2>
 
-        <!--<button id="calculate">Generate graph</button>-->
         <form name="myform"><div id="select_source"><br>
             <input type="submit" id="calculate" value="Generate graph"><br>
 
-            <input type="radio" name="select_source" value="url" checked>URL<br>
+            <input type="radio" name="select_source" value="url">URL<br>
             <input type="text" size="40" name="input_url" value="{{ url_for('static', filename='example.txt') }}"><br>
 
-            <input type="radio" name="select_source" value="text">Text:<br>
+            <input type="radio" name="select_source" value="text" checked>Text:<br>
             <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
         </div></form>
     </div>
@@ -40,71 +40,8 @@
     <script type=text/javascript>
         $(function() {
             $('#calculate').bind('click', function() {
-
-            var create_network = function(input_data) {
-                    var COLORS = ['#F19CBB', '#7CB9E8', '#B0BF1A'];
-                    var clusters = input_data.repr;
-                    var graph_data = {
-                        nodes: [],
-                        edges: []
-                    };
-                    var seen_nodes = {};
-                    for (i_cluster in clusters) {
-                        data = clusters[i_cluster];
-                        color = COLORS[i_cluster % COLORS.length];
-                        for (node in data.nodes) {
-                            if (!seen_nodes[node]) {
-                                var node_attrs = data.nodes[node];
-                                //console.log(node_attrs);
-                                var label = node_attrs.text || node;
-                                //console.log(label);
-                                var node_obj = {
-                                    'id': node,
-                                    'label': label,
-                                    'shape': 'box',
-                                    'color': color,
-                                    'mass': 2
-                                };
-                                if (data.nodes[node]['is_root']) {
-                                    node_obj.mass *= 2;
-                                    node_obj.font = {'size': 20};
-                                };
-                                graph_data.nodes.push(node_obj);
-                                seen_nodes[node] = node_attrs;
-                            }
-                        }
-                        for (from in data.edges) {
-                            for (to in data.edges[from]) {
-                                var attrs = data.edges[from][to];
-                                var edge_obj = {'from': from, 'to': to, 'color': color};
-                                if (attrs.layout === 'tree') {
-                                    edge_obj.arrows = 'to';
-                                }
-                                graph_data.edges.push(edge_obj);
-                            }
-                        }
-                    }
-                    var container = document.getElementById('mynetwork');
-                    var options = {};
-                    var network = new vis.Network(container, graph_data, options);
-
-                    network.on("selectNode", function(params) {
-                        var node = params.nodes[0];
-                        var attrs = seen_nodes[node];
-
-                        var urls_html = "";
-                        for (i_html in attrs.url) {
-                            var url = attrs.url[i_html];
-                            urls_html += "<a href="+url+">"+url+"</a><p>";
-                         }
-
-                         var note_html = "";
-                         for (i_note in attrs.note) {
-                            var note = attrs.note[i_note];
-                            note_html += note + "<p>";
-                         }
-                         document.getElementById("info").innerHTML = "<h4>'"+node+"' info:</h4>" + urls_html + "<p>" + note_html;
-                    });
+                var create_network = function (input_data) {
+                    mindGraph.createNetwork(input_data, 'mynetwork', 'info');
                 };
 
                 var input_text;
@@ -124,16 +61,17 @@
                     xhr.onload = function() {
                         input_text = xhr.responseText;
                         $.getJSON('/get_graph', { input_text: input_text }, create_network);
-                    }
+                    };
 
                     xhr.onerror = function() {
                         alert('Error ' + this.status);
-                    }
+                    };
                     xhr.send();
                 }
                 return false;
             });
         });
+
         // show pre-loaded data
         $(document).ready(function() {
             $('#input_text_area').load("{{ url_for('static', filename='example.txt') }}", function () {
