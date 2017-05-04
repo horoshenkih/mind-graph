@@ -3,3 +3,4 @@ Flask
 ninja2
 gunicorn==19.7.1
 pytest
+awsebcli
