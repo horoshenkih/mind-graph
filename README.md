@@ -4,4 +4,4 @@
 Visual representation of relations
 
 ## try it out
-https://mind-graph.appspot.com/
+http://mindgraph-dev2.eu-central-1.elasticbeanstalk.com/
