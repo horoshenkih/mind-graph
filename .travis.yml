@@ -10,5 +10,6 @@ deploy:
   region: eu-central-1
   app: mindgraph
   env: mindgraph-dev
+  bucket_name: elasticbeanstalk-eu-central-1-572297945351
   on:
     repo: horoshenkih/mind-graph
