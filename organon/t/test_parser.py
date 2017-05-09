@@ -68,6 +68,7 @@ A {
 # Node A
 A note 1
 A note 2
+# other header, ignored
 }
 A .relatedTo C
 A .relatedTo B
