@@ -23,12 +23,13 @@ var mindGraph = {
             for (node in data.nodes) {
                 if (!seen_nodes[node]) {
                     var node_attrs = data.nodes[node];
+
                     var label = node_attrs.text || node;
 
                     // Node without additional information is white
                     var node_color = mindGraphConstants.emptyNodeColor;
 
-                    if (node_attrs.url || node_attrs.note) {
+                    if (node_attrs.html) {
                         node_color = color;
                     }
                     var node_obj = {
@@ -64,19 +65,7 @@ var mindGraph = {
         network.on("selectNode", function(params) {
             var node = params.nodes[0];
             var attrs = seen_nodes[node];
-
-            var urls_html = "";
-            for (i_html in attrs.url) {
-                var url = attrs.url[i_html];
-                urls_html += "<a href="+url+">"+url+"</a><p>";
-            }
-
-            var note_html = "";
-            for (i_note in attrs.note) {
-                var note = attrs.note[i_note];
-                note_html += note + "<p>";
-            }
-            document.getElementById(nodeInfoElementId).innerHTML = "<h4>'"+node+"' info:</h4>" + urls_html + "<p>" + note_html;
+            document.getElementById(nodeInfoElementId).innerHTML = "<h4>'"+node+"' info:</h4>" + attrs.html;
         });
         return true;
     }

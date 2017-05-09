@@ -2,6 +2,8 @@ import re
 from collections import defaultdict
 from itertools import product
 import networkx as nx
+from bs4 import BeautifulSoup
+from markdown import markdown
 
 
 class Node:
@@ -113,51 +115,29 @@ class RelationGraph:
 
 
 class Parser:
+    comment = re.compile(r'#[^\n]*')
     spaces = re.compile(r'\s+')
     groups = re.compile(r'''
         ^
-        (.+)        # first vertex
+        ([^\{\}]+)        # first vertex
         \s+
         \.(\S+)     # relation (single word starting with dot)
         \s+
-        (.+)        # second vertex
+        ([^\{\}]+)        # second vertex
         $
         ''', re.X)
     enumerations = re.compile(r'\s*,\s*')
 
-    vertex_with_attributes = re.compile(r'''
-        ^
-        ([^\[\]]+?)         # vertex
+    node_with_attributes = re.compile(r'''
+        ^\s*
+        ([^\n\{\}]+?)         # node
         \s*
-        (\[[^\[\]]+\])?     # optional attributes in square brackets
-        $
-    ''', re.X)
+        \{([^\{\}]+?)\}     # attributes in curly brackets
+        \s*$
+    ''', re.X | re.S | re.M)
 
-    attributes_split = re.compile(r'\s*;\s*')
-    one_attribute_split = re.compile(r'\s*=\s*')
-
-    def __init__(self, unique_attributes=['text'], multiple_attributes = ['url', 'note']):
-        self._unique_attributes = set(unique_attributes)
-        self._multiple_attributes = set(multiple_attributes)
-        if not self._unique_attributes.isdisjoint(self._multiple_attributes):
-            raise ValueError("Sets with unique and multiple attributes must not overlap")
-
-    def _parse_attributes(self, attributes_text):
-        if attributes_text is None:
-            return None
-        attributes_text = re.sub(r'^\[|\]$', repl='', string=attributes_text)
-
-        attributes = dict()
-        for kv in self.attributes_split.split(attributes_text):
-            k, v = self.one_attribute_split.split(kv, maxsplit=1)
-            if k in self._unique_attributes:
-                attributes[k] = v
-            elif k in self._multiple_attributes:
-                if k in attributes:
-                    attributes[k].append(v)
-                else:
-                    attributes[k] = [v,]
-        return attributes
+    # https://gist.github.com/gruber/249502
+    url_re = re.compile(r'(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
 
     def parse_relations(self, text):
         '''Transform text to RelationGraph.
@@ -167,10 +147,27 @@ class Parser:
         '''
         relations = RelationGraph()
 
+        # parse nodes markdown
+        node_attributes = dict()
+        for match_node_md in self.node_with_attributes.findall(text):
+            node, md = match_node_md
+            # substitute_url
+            md = self.url_re.sub(r'[\1](\1)', md)
+            node_html = markdown(md)
+            node_attributes[node] = {'html': node_html}
+            parsed = BeautifulSoup(node_html, 'html.parser')
+            if parsed.h1:
+                node_attributes[node]['text'] = parsed.h1.string
+        text = self.node_with_attributes.sub('', text)
+
+        # remove comments
+        text = self.comment.sub('', text)
+
+        # parse relations
         for i, rawline in enumerate(text.split('\n')):
             # cleanup
             line = rawline.strip()
-            if not len(line) or line.startswith('#'):
+            if not len(line):
                 continue
             line = self.spaces.sub(' ', line)
 
@@ -179,13 +176,13 @@ class Parser:
             if m:
                 f, r, t = m.group(1,2,3)
                 for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
-                    fi, attr_fi_str = self.vertex_with_attributes.search(fi).group(1,2)
-                    ti, attr_ti_str = self.vertex_with_attributes.search(ti).group(1,2)
-                    attr_fi = self._parse_attributes(attr_fi_str)
-                    attr_ti = self._parse_attributes(attr_ti_str)
-
-                    edge_attributes = {}  # TODO
-                    relations.add_relation(Node(fi, attr_fi), r, Node(ti, attr_ti), edge_attributes)
+                    edge_attributes = {}  # TODO?
+                    relations.add_relation(
+                        Node(fi, node_attributes.get(fi)),
+                        r,
+                        Node(ti, node_attributes.get(ti)),
+                        edge_attributes
+                    )
             else:
                 raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))
 
