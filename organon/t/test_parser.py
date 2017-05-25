@@ -9,12 +9,6 @@ def assert_relations_sets(rg, node1, node2, expected_relations):
 
 
 class TestParser:
-    def test_no_relation(self):
-        ps = Parser()
-        text = "life is good"  # 'is' supposed to be relation, but leading dot is missing
-        with pytest.raises(RuntimeError):
-            rg = ps.parse_relations(text)
-
     def test_empty_relation(self):
         ps = Parser()
         text = "life . is good"  # extra space between leading dot and relation

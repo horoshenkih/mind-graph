@@ -3,7 +3,7 @@
  */
 
 var mindGraphConstants = {
-    colors : ['#F19CBB', '#7CB9E8', '#B0BF1A'],
+    colors : ['#7D8A2E', '#C9D787', '#FFC0A9', 'FF8598'],
     emptyNodeColor : '#FFFFFF',
 };
 

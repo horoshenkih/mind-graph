@@ -4,6 +4,8 @@ from itertools import product
 import networkx as nx
 from bs4 import BeautifulSoup
 from markdown import markdown
+from parsimonious.grammar import Grammar
+from parsimonious.nodes import NodeVisitor
 
 
 class Node:
@@ -114,30 +116,101 @@ class RelationGraph:
         return representation
 
 
+class MindGraphNodeVisitor(NodeVisitor):
+    def generic_visit(self, node, visited_children):
+        visited_children = list(filter(lambda x: x is not None, visited_children))
+        if not visited_children:
+            return
+        elif len(visited_children) == 1:
+            return visited_children[0]
+        else:
+            return visited_children
+
+    def visit_endl(self, node, visited_children):
+        return
+
+    def visit_comment(self, node, visited_children):
+        return {'type': 'comment', 'text': node.text}
+
+    def visit_word(self, node, visited_children):
+        return node.text
+
+    def visit_node_id(self, node, visited_children):
+        return node.text
+
+    def visit_markdown(self, node, visited_children):
+        rbrace, md, lbrace = visited_children
+        if md is not None:
+            return md.text
+
+    def visit_any_text(self, node, visited_children):
+        return node
+
+    def visit_node(self, node, visited_children):
+        node_id, _, md = visited_children
+        rv = {'type': 'node_id', 'id': node_id}
+        if md is not None:
+            rv['markdown'] = md
+        return rv
+
+    def visit_node_enumeration(self, node, visited_children):
+        c1, c2 = visited_children
+        if c2 is None:
+            c2 = []
+        if isinstance(c2, str):
+            c2 = [c2]
+        return [c1]+c2
+
+    def visit_relation(self, node, visited_children):
+        from_nodes, _, _, relation, _, to_nodes = visited_children
+        if isinstance(from_nodes, str):
+            from_nodes = [from_nodes]
+        if isinstance(to_nodes, str):
+            to_nodes = [to_nodes]
+
+        return {'type': 'relation', 'relation': [from_nodes, relation, to_nodes]}
+
+    def visit_mind_graph(self, node, visited_children):
+        return visited_children
+
+
 class Parser:
-    comment = re.compile(r'#[^\n]*')
-    spaces = re.compile(r'\s+')
-    groups = re.compile(r'''
-        ^
-        ([^\{\}]+)        # first vertex
-        \s+
-        \.(\S+)     # relation (single word starting with dot)
-        \s+
-        ([^\{\}]+)        # second vertex
-        $
-        ''', re.X)
-    enumerations = re.compile(r'\s*,\s*')
+    _grammar = r'''
+        mind_graph          = ((_/endl)* (relation / node / comment) (_/endl)*)*
 
-    node_with_attributes = re.compile(r'''
-        ^\s*
-        ([^\n\{\}]+?)         # node
-        \s*
-        \{([^\{\}]+?)\}     # attributes in curly brackets
-        \s*$
-    ''', re.X | re.S | re.M)
+        relation_begin      = '.'
+        node_enum_sep       = ','
+        endl                = '\n'
+        comment_start       = '#'
+        _                   = ' ' / '\t'
 
-    # https://gist.github.com/gruber/249502
-    url_re = re.compile(r'(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
+        comment             = comment_start~"[^\n]+"
+        #comment             = comment_start!endl*  # TODO!
+
+        markdown            = ('{' (_/endl)*) any_text ((_/endl)* '}')
+        any_text            = ~"[^{}]*"
+
+        word                = ~"[^ #.,\t\n{}]+"
+        #word                = !(comment_start / _ / endl / relation_begin / node_enum_sep / '{' / '}')+  # TODO!
+
+        node_id             = word (_+ word)*
+        node                = node_id (_/endl)* markdown?
+        node_enumeration    = node_id (node_enum_sep _* node_id)*
+
+        relation            = node_enumeration _+ '.'word _+ node_enumeration
+    '''
+
+    def __init__(self):
+        self.grammar_parser = Grammar(self.grammar)
+        self.node_visitor = MindGraphNodeVisitor()
+
+    @property
+    def grammar(self):
+        return self._grammar
+
+    def parse(self, text):
+        parsed = self.grammar_parser.parse(text)
+        return self.node_visitor.visit(parsed)
 
     def parse_relations(self, text):
         '''Transform text to RelationGraph.
@@ -145,46 +218,33 @@ class Parser:
         :param text:
         :return: RelationGraph object
         '''
-        relations = RelationGraph()
+        try:
+            parsed = self.parse(text)
+        except:
+            raise RuntimeError("Cannot parse!")
 
-        # parse nodes markdown
+        node_items = filter(lambda item: item.get('type') == 'node_id', parsed)
         node_attributes = dict()
-        for match_node_md in self.node_with_attributes.findall(text):
-            node, md = match_node_md
-            # substitute_url
-            md = self.url_re.sub(r'[\1](\1)', md)
-            node_html = markdown(md)
+        for item in node_items:
+            node = item['id']
+            node_html = markdown(item.get('markdown', ''))
             node_attributes[node] = {'html': node_html}
-            parsed = BeautifulSoup(node_html, 'html.parser')
-            if parsed.h1:
-                node_attributes[node]['text'] = parsed.h1.string
-        text = self.node_with_attributes.sub('', text)
+            parsed_html = BeautifulSoup(node_html, 'html.parser')
+            if parsed_html.h1:
+                node_attributes[node]['text'] = parsed_html.h1.string
 
-        # remove comments
-        text = self.comment.sub('', text)
-
-        # parse relations
-        for i, rawline in enumerate(text.split('\n')):
-            # cleanup
-            line = rawline.strip()
-            if not len(line):
-                continue
-            line = self.spaces.sub(' ', line)
-
-            # parse
-            m = self.groups.search(line)
-            if m:
-                f, r, t = m.group(1,2,3)
-                for (fi, ti) in product(self.enumerations.split(f), self.enumerations.split(t)):
-                    edge_attributes = {}  # TODO?
-                    relations.add_relation(
-                        Node(fi, node_attributes.get(fi)),
-                        r,
-                        Node(ti, node_attributes.get(ti)),
-                        edge_attributes
-                    )
-            else:
-                raise RuntimeError("Incorrect line {}: '{}'".format(i+1, rawline))
+        relation_items = filter(lambda item: item.get('type') == 'relation', parsed)
+        relations = RelationGraph()
+        for item in relation_items:
+            f, r, t = item['relation']
+            for (fi, ti) in product(f, t):
+                edge_attributes = {}  # TODO!
+                relations.add_relation(
+                    Node(fi, node_attributes.get(fi)),
+                    r,
+                    Node(ti, node_attributes.get(ti)),
+                    edge_attributes
+                )
 
         return relations
 

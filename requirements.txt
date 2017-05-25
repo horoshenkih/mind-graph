@@ -7,3 +7,4 @@ awsebcli
 markdown
 bleach
 beautifulsoup4
+parsimonious
