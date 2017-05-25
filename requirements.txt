@@ -8,3 +8,4 @@ markdown
 bleach
 beautifulsoup4
 parsimonious
+git+https://github.com/r0wb0t/markdown-urlize.git

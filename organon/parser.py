@@ -227,7 +227,7 @@ class Parser:
         node_attributes = dict()
         for item in node_items:
             node = item['id']
-            node_html = markdown(item.get('markdown', ''))
+            node_html = markdown(item.get('markdown', ''), extensions=['urlize'])
             node_attributes[node] = {'html': node_html}
             parsed_html = BeautifulSoup(node_html, 'html.parser')
             if parsed_html.h1:
