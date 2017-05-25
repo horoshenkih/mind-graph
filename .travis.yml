@@ -1,6 +1,8 @@
 language: python
 python: 3.5
-install: pip install -Ur requirements.txt
+install: 
+  - pip install -Ur requirements.txt
+  - pip install -U third-party/*
 script: py.test organon/t
 deploy:
   provider: elasticbeanstalk
