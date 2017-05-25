@@ -8,3 +8,4 @@ markdown
 bleach
 beautifulsoup4
 parsimonious
+markdown-urlize
