@@ -8,4 +8,4 @@ markdown
 bleach
 beautifulsoup4
 parsimonious
-third-party/markdown-urlize
+third-party/markdown-urlize-master.zip
