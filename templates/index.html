@@ -16,24 +16,20 @@
 </head>
 
 <body>
-    <div style='float:left; width:30%'>
+    <div class="container">
         <h2>MindGraph v0</h2>
-
-        <form name="myform"><div id="select_source"><br>
-            <input type="submit" id="calculate" value="Generate graph"><br>
-
-            <input type="radio" name="select_source" value="url">URL<br>
-            <input type="text" size="40" name="input_url" value="{{ url_for('static', filename='example.txt') }}"><br>
-
-            <input type="radio" name="select_source" value="text" checked>Text:<br>
-            <p><textarea name="input_text" cols="40" rows="25" id=input_text_area></textarea>
-        </div></form>
-    </div>
-
-    <div style='float:left; width:30%'>
-        <h3>Graph</h3>
-        <p><div id="mynetwork"></div>
-        <p><div id="info"></div>
+        <div class="row">
+            <div id="select_source" class="col-sm-4">
+                <form name="myform">
+                    <p><textarea class="form-control" name="input_text" rows="25" id=input_text_area></textarea>
+                </form>
+            </div>
+            <div class="col-sm-8">
+                <button type="button" id="calculate" class="btn btn-primary btn-lg">Generate graph</button>
+                <p><div id="mynetwork"></div>
+                <p><div id="info"></div>
+            </div>
+        </div>
     </div>
 
     <script type=text/javascript>
@@ -44,7 +40,7 @@
                 };
 
                 var input_text;
-                var selected_type = $("input[type='radio'][name='select_source']:checked").val();
+                var selected_type = 'text'; //$("input[type='radio'][name='select_source']:checked").val();
 
                 if (selected_type === 'text') {
                     input_text = $('textarea[name="input_text"]').val();
