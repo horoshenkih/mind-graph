@@ -2,32 +2,34 @@
  * Created by khoroshenkikh on 01.05.17.
  */
 
-var mindGraphConstants = {
+var __MindGraphConstants = {
     colors : ['#7D8A2E', '#C9D787', '#FFC0A9', 'FF8598'],
-    emptyNodeColor : '#FFFFFF',
+    emptyNodeColor : '#FFFFFF'
 };
 
-var mindGraph = {
-    createNetwork : function (inputGraphData, networkElementId, nodeInfoElementId) {
+var MindGraph = {
+    // graphData: undefined,
+    init : function (inputGraphData) {
+        var self = this;
 
         var clusters = inputGraphData.repr;
         var graph_data = {
             nodes: [],
             edges: []
         };
-        var COLORS = mindGraphConstants.colors;
-        var seen_nodes = {};
+        var COLORS = __MindGraphConstants.colors;
+        self.seen_nodes = {};
         for (i_cluster in clusters) {
             var data = clusters[i_cluster];
             var color = COLORS[i_cluster % COLORS.length];
             for (node in data.nodes) {
-                if (!seen_nodes[node]) {
+                if (!self.seen_nodes[node]) {
                     var node_attrs = data.nodes[node];
 
                     var label = node_attrs.text || node;
 
                     // Node without additional information is white
-                    var node_color = mindGraphConstants.emptyNodeColor;
+                    var node_color = __MindGraphConstants.emptyNodeColor;
 
                     if (node_attrs.html) {
                         node_color = color;
@@ -44,7 +46,7 @@ var mindGraph = {
                         node_obj.font = {'size': 20};
                     }
                     graph_data.nodes.push(node_obj);
-                    seen_nodes[node] = node_attrs;
+                    self.seen_nodes[node] = node_attrs;
                 }
             }
             for (from in data.edges) {
@@ -58,15 +60,34 @@ var mindGraph = {
                 }
             }
         }
+        self.graphData = graph_data;
+
+        return self;
+    },
+    selectedNode: undefined,
+    getSelectedNodeInfo: function () {
+        var self = this;
+        if (!self.seen_nodes) {
+            return "";
+        }
+        var attrs = self.seen_nodes[self.selectedNode];
+        if (!attrs) {
+            return "";
+        }
+        return "<h4>'"+self.selectedNode+"' info:</h4>" + attrs.html;
+    },
+    createNetwork: function (networkElementId) {
+        var self = this;
+
         var container = document.getElementById(networkElementId);
         var options = {};
-        var network = new vis.Network(container, graph_data, options);
+        var network = new vis.Network(container, self.graphData, options);
 
         network.on("selectNode", function(params) {
             var node = params.nodes[0];
-            var attrs = seen_nodes[node];
-            document.getElementById(nodeInfoElementId).innerHTML = "<h4>'"+node+"' info:</h4>" + attrs.html;
+            self.selectedNode = node;
         });
-        return true;
+
+        return network;
     }
 };

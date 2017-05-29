@@ -9,8 +9,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
-    <script src="{{ url_for('static', filename='js/lib/vis.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/lib/mindgraph.js') }}??rev=<?php echo time();?>"></script>
+
+    <script src="{{ url_for('static', filename='js/third-party/vis.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/third-party/knockout-3.4.2.js') }}"></script>
 
     <title>MindGraph</title>
 </head>
@@ -21,57 +22,17 @@
         <div class="row">
             <div id="select_source" class="col-sm-4">
                 <form name="myform">
-                    <p><textarea class="form-control" name="input_text" rows="25" id=input_text_area></textarea>
+                    <p><textarea class="form-control" rows=20 data-bind="value: graphText"></textarea>
+                    <p><div id="nodeInfo"></div>
                 </form>
             </div>
             <div class="col-sm-8">
-                <button type="button" id="calculate" class="btn btn-primary btn-lg">Generate graph</button>
-                <p><div id="mynetwork"></div>
-                <p><div id="info"></div>
+                <button type="button" class="btn btn-primary btn-lg" data-bind="click: computeNetwork">Generate graph</button>
+                <p><div id="network" data-bind="click: updateNodeInfo"></div>
             </div>
         </div>
     </div>
-
-    <script type=text/javascript>
-        $(function() {
-            $('#calculate').bind('click', function() {
-                var create_network = function (input_data) {
-                    mindGraph.createNetwork(input_data, 'mynetwork', 'info');
-                };
-
-                var input_text;
-                var selected_type = 'text'; //$("input[type='radio'][name='select_source']:checked").val();
-
-                if (selected_type === 'text') {
-                    input_text = $('textarea[name="input_text"]').val();
-                    $.getJSON('/get_graph', { input_text: input_text }, create_network);
-                } else {
-                    var input_url = $('input[type="text"][name="input_url"]').val();
-
-                    var XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
-                    var xhr = new XHR();
-
-                    xhr.open('GET', input_url, true);
-
-                    xhr.onload = function() {
-                        input_text = xhr.responseText;
-                        $.getJSON('/get_graph', { input_text: input_text }, create_network);
-                    };
-
-                    xhr.onerror = function() {
-                        alert('Error ' + this.status);
-                    };
-                    xhr.send();
-                }
-                return false;
-            });
-        });
-
-        // show pre-loaded data
-        $(document).ready(function() {
-            $('#input_text_area').load("{{ url_for('static', filename='example.txt') }}", function () {
-                document.getElementById('calculate').click();
-            });
-        });
-    </script>
 </body>
+
+<script src="{{ url_for('static', filename='js/lib/mindgraph.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lib/vm.js') }}"></script>
