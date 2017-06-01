@@ -10,8 +10,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
 
-    <script src="{{ url_for('static', filename='js/third-party/vis.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/third-party/knockout-3.4.2.js') }}"></script>
 
     <title>MindGraph</title>
 </head>
@@ -21,6 +19,28 @@
         <h2>MindGraph v0</h2>
         <div class="row">
             <div id="select_source" class="col-sm-4">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select source
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu" data-bind="foreach: storages">
+                        <li><span data-bind="text: name, click: $parent.selectStorage"> </span></li>
+                    </ul>
+                </div>
+                <div class="btn-toolbar">
+                    <div class="btn btn-primary" type="button" data-bind="css: isActiveOpenButton() ? '' : 'disabled'">
+                        Open</div>
+                    <div class="btn-group">
+                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
+                            Save</div>
+                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
+                            Save as</div>
+                    </div>
+                </div>
+                <div class="bg-info text-white">
+                    <i class="icon-file icon-white"></i>
+                    <span data-bind="text: selectedStorage().name !== undefined ? selectedStorage().name+': ' : ''"></span>
+                </div>
+
                 <form name="myform">
                     <p><textarea class="form-control" rows=20 data-bind="value: graphText"></textarea>
                     <p><div id="nodeInfo"></div>
@@ -34,5 +54,8 @@
     </div>
 </body>
 
+<script src="{{ url_for('static', filename='js/third-party/vis.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/third-party/knockout-3.4.2.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lib/mindgraph.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lib/storage.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lib/vm.js') }}"></script>
