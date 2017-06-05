@@ -23,12 +23,32 @@
                     <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select source
                         <span class="caret"></span></button>
                     <ul class="dropdown-menu" data-bind="foreach: storages">
-                        <li><span data-bind="text: name, click: $parent.selectStorage"> </span></li>
+                        <li><a href="#"><span data-bind="text: name, click: $parent.selectStorage"> </span></a></li>
                     </ul>
                 </div>
+                <br>
                 <div class="btn-toolbar">
-                    <div class="btn btn-primary" type="button" data-bind="css: isActiveOpenButton() ? '' : 'disabled'">
+                    <div class="btn btn-primary" type="button" data-bind="css: isActiveOpenButton() ? '' : 'disabled'" data-toggle="modal" data-target="#openStorageWindow">
                         Open</div>
+                    <div id="openStorageWindow" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Open file</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <ul data-bind="foreach: listDirectory()">
+                                        <li><a href="#"><span data-bind="text: path, click: $parent.selectInDirectory"></span></a></li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                     <div class="btn-group">
                         <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
                             Save</div>
