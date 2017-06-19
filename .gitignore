@@ -1,5 +1,11 @@
 env-mindgraph/
 organon/__pycache__/
+organon/t/__pycache__/
+organon/*.pyc
+*.dot
+.idea/
+.cache/
+mind-graph-23440bbdaea2.json
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

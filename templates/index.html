@@ -20,7 +20,8 @@
         <div class="row">
             <div id="select_source" class="col-sm-4">
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select source
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        <span data-bind="text: selectedStorage().name !== undefined ? selectedStorage().name : 'Select source'"></span>
                         <span class="caret"></span></button>
                     <ul class="dropdown-menu" data-bind="foreach: storages">
                         <li><a href="#"><span data-bind="text: name, click: $parent.selectStorage"> </span></a></li>
@@ -55,10 +56,6 @@
                         <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
                             Save as</div>
                     </div>
-                </div>
-                <div class="bg-info text-white">
-                    <i class="icon-file icon-white"></i>
-                    <span data-bind="text: selectedStorage().name !== undefined ? selectedStorage().name+': ' : ''"></span>
                 </div>
 
                 <form name="myform">
