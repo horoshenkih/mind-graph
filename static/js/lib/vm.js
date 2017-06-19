@@ -32,18 +32,16 @@ var applyViewModel = function() {
     self.selectInDirectory = function (data, event) {
         if (data._type === 'file') {
             self.selectedFilePath(data.path);
+            var st = self.selectedStorage();
+            if (st.readFile) {
+                self.graphText(st.readFile(self.selectedFilePath()));
+            }
         } else if (data._type === 'directory') {
             self.selectedDirectoryPath(data.path);
         }
     };
 
-    // self.graphText = ko.observable("ko .is framework\nko {http://knockoutjs.com/}");
-    self.graphText = ko.computed(function () {
-        var st = self.selectedStorage();
-        if (st.readFile) {
-            return st.readFile(self.selectedFilePath());
-        }
-    });
+    self.graphText = ko.observable("");
 
     self.graph = ko.computed(function () {
         var input_text = self.graphText();
