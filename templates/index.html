@@ -39,8 +39,11 @@
                                     <h4 class="modal-title">Open file</h4>
                                 </div>
                                 <div class="modal-body">
+                                    <div data-bind="foreach: parentDirectorySequence()">
+                                        <a href="#"><span data-bind="text: name + '/', click: $parent.selectCurrentDirectory"></span></a>
+                                    </div>
                                     <ul data-bind="foreach: listDirectory()">
-                                        <li><a href="#"><span data-bind="text: path, click: $parent.selectInDirectory"></span></a></li>
+                                        <li><a href="#"><span data-bind="text: _type === 'file' ? name : name+'/', click: $parent.selectInDirectory"></span></a></li>
                                     </ul>
                                 </div>
                                 <div class="modal-footer">

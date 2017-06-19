@@ -41,6 +41,39 @@ var applyViewModel = function() {
         }
     };
 
+    self.selectParentDirectory = function (data, event) {
+        self.selectedDirectoryPath(self.parentDirectory().path);
+    };
+
+    self.selectCurrentDirectory = function (data, event) {
+        self.selectedDirectoryPath(data.path);
+    };
+
+    self.parentDirectory = ko.computed(function () {
+        var st = self.selectedStorage();
+        var r = {name: ''};
+        if (st.getParentDirectory) {
+            return st.getParentDirectory(self.selectedFilePath() || self.selectedDirectoryPath()) || r;
+        }
+        return r;
+    });
+
+    self.parentDirectorySequence = ko.computed(function () {
+        var st = self.selectedStorage();
+        if (!st.getParentDirectory) {
+            return [];
+        }
+
+        var parentDir = self.parentDirectory();
+        var sequence = [];
+
+        while ((typeof parentDir !== 'undefined') && sequence.length < 128) {
+            sequence.unshift(parentDir);
+            parentDir = st.getParentDirectory(parentDir.path);
+        }
+        return sequence;
+    });
+
     self.graphText = ko.observable("");
 
     self.graph = ko.computed(function () {

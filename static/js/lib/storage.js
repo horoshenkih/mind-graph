@@ -3,7 +3,17 @@
  */
 
 function normalizePath(path) {
+    if (typeof path === 'undefined') {
+        return undefined;
+    }
     return path.replace(/\/+/g, '/');
+}
+
+function baseName(path) {
+    if (typeof path === 'undefined') {
+        return undefined;
+    }
+    return path.split('/').pop();
 }
 
 // prototypes
@@ -11,7 +21,8 @@ function BaseFile(path, content) {
     return {
         _type: 'file',
         path: path,
-        content: content
+        content: content,
+        name: baseName(path)
     };
 }
 
@@ -19,7 +30,8 @@ function BaseDirectory(path, contentNames) {
     return {
         _type: 'directory',
         path: path,
-        contentNames: contentNames
+        contentNames: contentNames,
+        name: baseName(path)
     }
 }
 
@@ -30,6 +42,8 @@ function BaseStorage() {
 
         createDirectory: function (directory) {},
         listDirectory: function (directory) {},
+
+        getParentDirectory: function(path) {},
 
         createFile: function (filePath) {},
         readFile: function (filePath) {},
@@ -46,6 +60,7 @@ var EmptyStorage = new BaseStorage();
 EmptyStorage.accessStorage = undefined;
 EmptyStorage.createDirectory = undefined;
 EmptyStorage.listDirectory = undefined;
+EmptyStorage.getParentDirectory = undefined;
 EmptyStorage.createFile = undefined;
 
 //////////////////////////////////////
@@ -106,9 +121,7 @@ ExampleStorage.accessStorage = function () {
 };
 
 ExampleStorage.listDirectory = function (directoryPath) {
-    if (!this._accessed) {
-        this.accessStorage();
-    }
+    if (!this._accessed) { this.accessStorage(); }
     directoryPath = normalizePath(directoryPath);
     var storageItem = this._files[directoryPath];
     var content = [];
@@ -125,10 +138,27 @@ ExampleStorage.listDirectory = function (directoryPath) {
     return content;
 };
 
-ExampleStorage.readFile = function (filePath) {
-    if (!this._accessed) {
-        this.accessStorage();
+ExampleStorage.getParentDirectory = function (path) {
+    if (!this._accessed) { this.accessStorage(); }
+
+    path = normalizePath(path);
+    if (typeof path === 'undefined' || path === '/') {
+        return undefined;
     }
+
+    var items = path.split('/');
+    items.pop();
+
+    if (items.length === 1 && items[0] === '') {
+        return this._files['/'];
+    }
+
+    var parentPath = items.join('/');
+    return this._files[parentPath];
+};
+
+ExampleStorage.readFile = function (filePath) {
+    if (!this._accessed) { this.accessStorage(); }
     filePath = normalizePath(filePath);
     var storageItem = this._files[filePath];
     if (storageItem && storageItem._type === 'file') {
