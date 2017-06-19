@@ -1,0 +1,7 @@
+exclude:
+- /junk/js/.*
+- /static/js/third-party/.*
+component_depth: 1
+languages:
+- javascript
+- python
