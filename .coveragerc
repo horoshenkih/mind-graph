@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = organon/*.py
+
+[report]
+omit = organon/t/*
