@@ -14,3 +14,6 @@ deploy:
   bucket_name: elasticbeanstalk-eu-central-1-572297945351
   on:
     repo: horoshenkih/mind-graph
+
+after_success:
+    - codecov
