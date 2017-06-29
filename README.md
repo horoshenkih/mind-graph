@@ -6,4 +6,4 @@
 Visual representation of relations
 
 ## try it out
-http://mindgraph-dev2.eu-central-1.elasticbeanstalk.com/
+[mindgraph.xyz](http://mindgraph.xyz/)
