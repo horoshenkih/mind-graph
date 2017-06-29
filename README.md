@@ -6,4 +6,4 @@
 Visual representation of relations
 
 ## try it out
-[mindgraph.xyz](http://mindgraph.xyz/)
+[mindgraph.xyz](https://mindgraph.xyz/)
