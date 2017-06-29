@@ -1,7 +1,6 @@
 /**
- * Created by khoroshenkikh on 01.06.17.
+ * Created by khoroshenkikh on 29.06.17.
  */
-
 function normalizePath(path) {
     if (typeof path === 'undefined') {
         return undefined;
@@ -9,74 +8,19 @@ function normalizePath(path) {
     return path.replace(/\/+/g, '/');
 }
 
-function baseName(path) {
-    if (typeof path === 'undefined') {
-        return undefined;
-    }
-    return path.split('/').pop();
-}
-
-// prototypes
-function BaseFile(path, content) {
-    return {
-        _type: 'file',
-        path: path,
-        content: content,
-        name: baseName(path)
-    };
-}
-
-function BaseDirectory(path, contentNames) {
-    return {
-        _type: 'directory',
-        path: path,
-        contentNames: contentNames,
-        name: baseName(path)
-    }
-}
-
-function BaseStorage() {
-    return {
-        name: undefined,
-        accessStorage: function () {},
-
-        createDirectory: function (directory) {},
-        listDirectory: function (directory) {},
-
-        getParentDirectory: function(path) {},
-
-        createFile: function (filePath) {},
-        readFile: function (filePath) {},
-        writeFile: function (filePath) {}
-    };
-}
-
-// implementations
-///////////////////////////////////
-var EmptyFile = new BaseFile(undefined, "ko .is framework\nko {http://knockoutjs.com/}");
-// var RootDirectory = new BaseDirectory('/', undefined);
-
-var EmptyStorage = new BaseStorage();
-EmptyStorage.accessStorage = undefined;
-EmptyStorage.createDirectory = undefined;
-EmptyStorage.listDirectory = undefined;
-EmptyStorage.getParentDirectory = undefined;
-EmptyStorage.createFile = undefined;
-
-//////////////////////////////////////
 var ExampleStorage = new BaseStorage();
 ExampleStorage.name = "Examples";
 
-// data
 ExampleStorage._examples = {
     "Basic examples": {
-        1: "a, b .is c"
+        "Terms": "a .is b\nterm One .isRelatedTo term Two",
+        "Relations": "a .is b",
+        "More examples": {
+            "Enumeration of terms": "a, b .is c"
+        }
     },
     "Advanced examples": {
-        1: "a {\
-        # Markdown header\
-        }\
-        a .is b"
+        "markdown": "a {\n    # Markdown header\n}\na .is b"
     }
 };
 
@@ -169,7 +113,3 @@ ExampleStorage.readFile = function (filePath) {
 ExampleStorage.createDirectory = undefined;
 ExampleStorage.createFile = undefined;
 ExampleStorage.writeFile = undefined;
-
-var storages = [
-    ExampleStorage
-];

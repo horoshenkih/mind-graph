@@ -1,10 +1,15 @@
 /**
  * Created by khoroshenkikh on 29.05.17.
  */
+
 var applyViewModel = function() {
     var self = this;
 
-    self.storages = storages;
+    self.storages = [
+        ExampleStorage,
+        DropboxStorage
+    ];
+
     self.selectedStorage = ko.observable(EmptyStorage);
     self.selectedDirectoryPath = ko.observable('/');
     self.selectedFilePath = ko.observable('');
@@ -51,22 +56,20 @@ var applyViewModel = function() {
 
     self.parentDirectory = ko.computed(function () {
         var st = self.selectedStorage();
-        var r = {name: ''};
-        if (st.getParentDirectory) {
-            return st.getParentDirectory(self.selectedFilePath() || self.selectedDirectoryPath()) || r;
-        }
-        return r;
+        var filePath = self.selectedFilePath();
+        var dirPath = self.selectedDirectoryPath();
+        return st.getParentDirectory(dirPath || filePath);
     });
 
     self.parentDirectorySequence = ko.computed(function () {
         var st = self.selectedStorage();
-        if (!st.getParentDirectory) {
-            return [];
-        }
 
-        var parentDir = self.parentDirectory();
         var sequence = [];
-
+        var parentDir = self.parentDirectory();
+        console.log(self.selectedFilePath());
+        console.log(self.selectedDirectoryPath());
+        console.log(parentDir);
+        console.log('---');
         while ((typeof parentDir !== 'undefined') && sequence.length < 128) {
             sequence.unshift(parentDir);
             parentDir = st.getParentDirectory(parentDir.path);
