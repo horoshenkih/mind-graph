@@ -62,24 +62,29 @@ ExampleStorage.accessStorage = function () {
         }
     }
     self._accessed = true;
+    return undefined;
 };
 
 ExampleStorage.listDirectory = function (directoryPath) {
     if (!this._accessed) { this.accessStorage(); }
-    directoryPath = normalizePath(directoryPath);
-    var storageItem = this._files[directoryPath];
-    var content = [];
-    if (storageItem && storageItem._type === 'directory') {
-        for (i in storageItem.contentNames) {
-            var subItem = storageItem.contentNames[i];
-            var subItemPath = normalizePath(directoryPath + '/' + subItem);
-            var subItemFile = this._files[subItemPath];
-            if (subItemFile) {
-                content.push(subItemFile);
+    var self = this;
+    return new Promise(function (resolve, reject) {
+            directoryPath = normalizePath(directoryPath);
+            var storageItem = self._files[directoryPath];
+            var content = [];
+            if (storageItem && storageItem._type === 'directory') {
+                for (i in storageItem.contentNames) {
+                    var subItem = storageItem.contentNames[i];
+                    var subItemPath = normalizePath(directoryPath + '/' + subItem);
+                    var subItemFile = self._files[subItemPath];
+                    if (subItemFile) {
+                        content.push(subItemFile);
+                    }
+                }
             }
+            resolve(content);
         }
-    }
-    return content;
+    );
 };
 
 ExampleStorage.getParentDirectory = function (path) {
@@ -103,11 +108,14 @@ ExampleStorage.getParentDirectory = function (path) {
 
 ExampleStorage.readFile = function (filePath) {
     if (!this._accessed) { this.accessStorage(); }
-    filePath = normalizePath(filePath);
-    var storageItem = this._files[filePath];
-    if (storageItem && storageItem._type === 'file') {
-        return storageItem.content;
-    }
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        filePath = normalizePath(filePath);
+        var storageItem = self._files[filePath];
+        if (storageItem && storageItem._type === 'file') {
+            resolve(storageItem.content);
+        }
+    });
 };
 
 ExampleStorage.createDirectory = undefined;

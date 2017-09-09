@@ -13,10 +13,12 @@ var applyViewModel = function() {
     self.selectedStorage = ko.observable(EmptyStorage);
     self.selectedDirectoryPath = ko.observable('/');
     self.selectedFilePath = ko.observable('');
+    self.accessUrl = ko.observable(undefined);
 
     self.selectStorage = function (data, event) {
         self.selectedStorage(data);
-        self.selectedStorage().accessStorage();
+        var url = self.selectedStorage().accessStorage();
+        self.accessUrl(url);
     };
 
     self.isActiveSaveButton = ko.computed(function () {
@@ -27,19 +29,26 @@ var applyViewModel = function() {
         return !(self.selectedStorage().accessStorage === undefined);
     });
 
-    self.listDirectory = ko.computed(function () {
+    self.listDirectory = ko.observable();  // Storage listDirectory returns Promise
+    ko.computed(function () {
         var st = self.selectedStorage();
         if (st.listDirectory) {
-            return st.listDirectory(self.selectedDirectoryPath());
+            st.listDirectory(self.selectedDirectoryPath())
+                .then(function(l) {
+                    self.listDirectory(l);
+                });
         }
-    });
+    }, self);
 
     self.selectInDirectory = function (data, event) {
         if (data._type === 'file') {
             self.selectedFilePath(data.path);
             var st = self.selectedStorage();
             if (st.readFile) {
-                self.graphText(st.readFile(self.selectedFilePath()));
+                st.readFile(self.selectedFilePath())
+                    .then(function(c) {
+                        self.graphText(c);
+                    });
             }
         } else if (data._type === 'directory') {
             self.selectedDirectoryPath(data.path);
@@ -66,10 +75,6 @@ var applyViewModel = function() {
 
         var sequence = [];
         var parentDir = self.parentDirectory();
-        console.log(self.selectedFilePath());
-        console.log(self.selectedDirectoryPath());
-        console.log(parentDir);
-        console.log('---');
         while ((typeof parentDir !== 'undefined') && sequence.length < 128) {
             sequence.unshift(parentDir);
             parentDir = st.getParentDirectory(parentDir.path);
