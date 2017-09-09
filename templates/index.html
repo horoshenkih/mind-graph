@@ -74,12 +74,15 @@
                         </div>
                     </div>
                     <div class="btn-group">
-                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
+                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled', click: saveFile">
                             Save</div>
-                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveButton() ? '' : 'disabled'">
+                        <div class="btn btn-primary" type="button" data-bind="css: isActiveSaveAsButton() ? '' : 'disabled'">
                             Save as</div>
                     </div>
                 </div>
+
+                <div data-bind="foreach: parentDirectorySequence()"><span data-bind="text: name + '/'"></span></div>
+                <span data-bind="text: selectedFile().name"></span>
 
                 <form name="myform">
                     <p><textarea class="form-control" rows=20 data-bind="value: graphText"></textarea>

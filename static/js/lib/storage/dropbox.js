@@ -73,6 +73,24 @@ DropboxStorage.readFile = function (filePath) {
     })
 };
 
+DropboxStorage.writeFile = function (filePath, content) {
+    var self = this;
+    if (!self._accessed) { self.accessStorage(); }
+
+    return new Promise(function (resolve, reject) {
+        self._dbx.filesUpload({path: filePath, contents: content, mode: {'.tag': 'overwrite'}})
+            .then(function (response) {
+                resolve(response);
+            })
+            .catch(function (error) {
+                reject(error);
+            });
+    });
+};
+
+DropboxStorage.createFile = undefined;
+DropboxStorage.createDirectory = undefined;
+
 (function(window){
     window.utils = {
         parseQueryString: function(str) {

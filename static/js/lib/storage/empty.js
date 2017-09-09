@@ -10,3 +10,4 @@ EmptyStorage.accessStorage = undefined;
 EmptyStorage.createDirectory = undefined;
 EmptyStorage.listDirectory = undefined;
 EmptyStorage.createFile = undefined;
+EmptyStorage.writeFile = undefined;

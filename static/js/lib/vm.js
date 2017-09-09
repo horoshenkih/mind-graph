@@ -12,17 +12,23 @@ var applyViewModel = function() {
 
     self.selectedStorage = ko.observable(EmptyStorage);
     self.selectedDirectoryPath = ko.observable('/');
-    self.selectedFilePath = ko.observable('');
+    self.selectedFile = ko.observable({});
+    self.selectedFileName = ko.observable('');
     self.accessUrl = ko.observable(undefined);
 
     self.selectStorage = function (data, event) {
         self.selectedStorage(data);
+        self.selectedDirectoryPath('/');
         var url = self.selectedStorage().accessStorage();
         self.accessUrl(url);
     };
 
     self.isActiveSaveButton = ko.computed(function () {
-        return !(self.selectedStorage().createFile === undefined);
+        return !(self.selectedStorage().writeFile === undefined);
+    });
+
+    self.isActiveSaveAsButton = ko.computed(function () {
+        return !(self.selectedStorage().createFile === undefined) && !(self.selectedStorage().writeFile === undefined);
     });
 
     self.isActiveOpenButton = ko.computed(function () {
@@ -42,10 +48,10 @@ var applyViewModel = function() {
 
     self.selectInDirectory = function (data, event) {
         if (data._type === 'file') {
-            self.selectedFilePath(data.path);
+            self.selectedFile(data);
             var st = self.selectedStorage();
             if (st.readFile) {
-                st.readFile(self.selectedFilePath())
+                st.readFile(self.selectedFile().path)
                     .then(function(c) {
                         self.graphText(c);
                     });
@@ -65,7 +71,7 @@ var applyViewModel = function() {
 
     self.parentDirectory = ko.computed(function () {
         var st = self.selectedStorage();
-        var filePath = self.selectedFilePath();
+        var filePath = self.selectedFile().path;
         var dirPath = self.selectedDirectoryPath();
         return st.getParentDirectory(dirPath || filePath);
     });
@@ -81,6 +87,16 @@ var applyViewModel = function() {
         }
         return sequence;
     });
+
+    self.saveFile = function (data, event) {
+        var st = self.selectedStorage();
+        if (st.writeFile) {
+            st.writeFile(self.selectedFile().path, self.graphText())
+                .then(function(m) {
+                    console.log(m);
+                });
+        }
+    };
 
     self.graphText = ko.observable("");
 
