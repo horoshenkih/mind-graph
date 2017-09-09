@@ -3,15 +3,30 @@
  */
 
 var DropboxStorage = new BaseStorage();
-function DropboxFile(dbxEntry) {
+function DropboxFile(dbxEntry, parent) {
     return {
         _type: 'file',
         path: dbxEntry.id,
-        name: dbxEntry.name
+        name: dbxEntry.name,
+        parent: parent
+    }
+}
+
+function DropboxDirectory(dbxEntry, parent) {
+    return {
+        _type: 'directory',
+        path: dbxEntry.id,
+        name: dbxEntry.name,
+        parent: parent
     }
 }
 
 DropboxStorage.name = "Dropbox";
+
+DropboxStorage.rootDirectory = function () {
+    return DropboxDirectory({id: '', name: '', parent: undefined});
+};
+
 var CLIENT_ID = 'gs3i8fg9vy0t6p0';
 DropboxStorage._accessed = false;
 DropboxStorage._dbx = new Dropbox({clientId: CLIENT_ID});
@@ -32,22 +47,21 @@ DropboxStorage.accessStorage = function () {
     return self._dbx.getAuthenticationUrl(window.location.origin+'/');
 };
 
-DropboxStorage.listDirectory = function (directoryPath) {
+DropboxStorage.listDirectory = function (directory) {
     var self = this;
     if (!self._accessed) { self.accessStorage(); }
-    directoryPath = directoryPath.replace(/^\/+/, '');
 
     return new Promise(function (resolve, reject) {
         var content = [];
 
-        self._dbx.filesListFolder({path: directoryPath})
+        self._dbx.filesListFolder({path: directory.path})
             .then(function (response) {
                 for (e in response.entries) {
                     var entry = response.entries[e];
                     if (entry['.tag'] === 'file') {
-                        content.push(new DropboxFile(entry));
+                        content.push(new DropboxFile(entry, directory));
                     } else if (entry['.tag'] === 'folder') {
-                        content.push(new BaseDirectory(entry.path_display, undefined));
+                        content.push(new DropboxDirectory(entry, directory));
                     }
                 }
                 resolve(content);
@@ -86,6 +100,10 @@ DropboxStorage.writeFile = function (filePath, content) {
                 reject(error);
             });
     });
+};
+
+DropboxStorage.getParentDirectory = function (obj) {
+    return obj.parent;
 };
 
 DropboxStorage.createFile = undefined;

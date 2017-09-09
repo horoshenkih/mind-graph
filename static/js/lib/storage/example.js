@@ -24,6 +24,9 @@ ExampleStorage._examples = {
     }
 };
 
+ExampleStorage.rootDirectory = function () {
+    return BaseDirectory('/', undefined);
+};
 
 ExampleStorage._files = {};  // path -> object
 ExampleStorage._accessed = false;
@@ -43,7 +46,7 @@ ExampleStorage.accessStorage = function () {
             currentContent = currentContent[key_name];
         }
 
-        var pathStr = '/' + pathToTraverse.join('/');
+        var pathStr = self.rootDirectory().path + pathToTraverse.join('/');
         if (typeof currentContent === 'string') {
             // file
             self._files[pathStr] = new BaseFile(pathStr, currentContent);
@@ -65,11 +68,11 @@ ExampleStorage.accessStorage = function () {
     return undefined;
 };
 
-ExampleStorage.listDirectory = function (directoryPath) {
+ExampleStorage.listDirectory = function (directory) {
     if (!this._accessed) { this.accessStorage(); }
     var self = this;
     return new Promise(function (resolve, reject) {
-            directoryPath = normalizePath(directoryPath);
+            var directoryPath = normalizePath(directory.path);
             var storageItem = self._files[directoryPath];
             var content = [];
             if (storageItem && storageItem._type === 'directory') {
@@ -87,10 +90,10 @@ ExampleStorage.listDirectory = function (directoryPath) {
     );
 };
 
-ExampleStorage.getParentDirectory = function (path) {
+ExampleStorage.getParentDirectory = function (obj) {
     if (!this._accessed) { this.accessStorage(); }
 
-    path = normalizePath(path);
+    path = normalizePath(obj.path);
     if (typeof path === 'undefined' || path === '/') {
         return undefined;
     }

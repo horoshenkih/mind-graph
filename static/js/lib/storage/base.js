@@ -31,12 +31,13 @@ function BaseDirectory(path, contentNames) {
 function BaseStorage() {
     return {
         name: undefined,
+        rootDirectory: function () { return BaseDirectory(undefined, undefined); },
         accessStorage: function () {},
 
         createDirectory: function (directory) {},
         listDirectory: function (directory) {},
 
-        getParentDirectory: function(path) { return undefined; },
+        getParentDirectory: function(obj) { return undefined; },
 
         createFile: function (filePath) {},
         readFile: function (filePath) {},

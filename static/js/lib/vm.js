@@ -11,15 +11,16 @@ var applyViewModel = function() {
     ];
 
     self.selectedStorage = ko.observable(EmptyStorage);
-    self.selectedDirectoryPath = ko.observable('/');
+    self.selectedDirectory = ko.observable({});
     self.selectedFile = ko.observable({});
     self.selectedFileName = ko.observable('');
     self.accessUrl = ko.observable(undefined);
 
     self.selectStorage = function (data, event) {
         self.selectedStorage(data);
-        self.selectedDirectoryPath('/');
-        var url = self.selectedStorage().accessStorage();
+        var st = self.selectedStorage();
+        self.selectedDirectory(st.rootDirectory());
+        var url = st.accessStorage();
         self.accessUrl(url);
     };
 
@@ -39,7 +40,7 @@ var applyViewModel = function() {
     ko.computed(function () {
         var st = self.selectedStorage();
         if (st.listDirectory) {
-            st.listDirectory(self.selectedDirectoryPath())
+            st.listDirectory(self.selectedDirectory())
                 .then(function(l) {
                     self.listDirectory(l);
                 });
@@ -57,23 +58,23 @@ var applyViewModel = function() {
                     });
             }
         } else if (data._type === 'directory') {
-            self.selectedDirectoryPath(data.path);
+            self.selectedDirectory(data);
         }
     };
 
     self.selectParentDirectory = function (data, event) {
-        self.selectedDirectoryPath(self.parentDirectory().path);
+        self.selectedDirectory(self.parentDirectory());
     };
 
     self.selectCurrentDirectory = function (data, event) {
-        self.selectedDirectoryPath(data.path);
+        self.selectedDirectory(data);
     };
 
     self.parentDirectory = ko.computed(function () {
         var st = self.selectedStorage();
-        var filePath = self.selectedFile().path;
-        var dirPath = self.selectedDirectoryPath();
-        return st.getParentDirectory(dirPath || filePath);
+        var file = self.selectedFile();
+        var dir = self.selectedDirectory();
+        return st.getParentDirectory(dir || file);
     });
 
     self.parentDirectorySequence = ko.computed(function () {
@@ -83,7 +84,7 @@ var applyViewModel = function() {
         var parentDir = self.parentDirectory();
         while ((typeof parentDir !== 'undefined') && sequence.length < 128) {
             sequence.unshift(parentDir);
-            parentDir = st.getParentDirectory(parentDir.path);
+            parentDir = st.getParentDirectory(parentDir);
         }
         return sequence;
     });
