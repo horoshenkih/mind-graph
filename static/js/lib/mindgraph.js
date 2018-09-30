@@ -12,7 +12,7 @@ var MindGraph = {
     init : function (inputGraphData) {
         var self = this;
 
-        var clusters = inputGraphData.repr;
+        var clusters = inputGraphData.repr || inputGraphData;
         var graph_data = {
             nodes: [],
             edges: []
