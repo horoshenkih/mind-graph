@@ -76,7 +76,7 @@ var MindGraph = {
         }
         return "<h4>'"+self.selectedNode+"' info:</h4>" + attrs.html;
     },
-    createNetwork: function (networkElementId) {
+    createNetwork: function (networkElementId, selectedNodeElementID) {
         var self = this;
 
         var container = document.getElementById(networkElementId);
@@ -86,6 +86,7 @@ var MindGraph = {
         network.on("selectNode", function(params) {
             var node = params.nodes[0];
             self.selectedNode = node;
+            document.getElementById(selectedNodeElementID).innerHTML = self.getSelectedNodeInfo();
         });
 
         return network;
