@@ -184,7 +184,7 @@ class Parser:
         comment_start       = '#'
         _                   = ' ' / '\t'
 
-        comment             = comment_start~"[^\n]+"
+        comment             = comment_start~"[^\n]*"
         #comment             = comment_start!endl*  # TODO!
 
         markdown            = ('{' (_/endl)*) any_text ((_/endl)* '}')

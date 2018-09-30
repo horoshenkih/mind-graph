@@ -21,7 +21,7 @@ class TestParser:
             # comment for A
             A 1, A 2 .is A
 
-            # comment for B
+            #
             B 1, B 2, B 3 .is B
 
             # relations between A and B
