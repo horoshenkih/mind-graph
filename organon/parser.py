@@ -76,7 +76,7 @@ class RelationGraph:
             'nodes': {node1: node_attrs1, node2: node_attrs2, ...}
             'edges': {{node1: {node12, edge_attrs1}, node13: edge_attrs2, ...}, ...}
         }
-        If bool(['attributes']['is_directed']) == False, then nodes in each edge are sorted in lexicografic order.
+        If bool(['attributes']['is_directed']) == False, then nodes in each edge are sorted in lexicographic order.
 
         :return: list of dicts
         '''
@@ -90,6 +90,7 @@ class RelationGraph:
                 graph_dict = {'attributes': {'relation': relation}, 'nodes': dict(), 'edges': dict()}
 
                 subgraph = graph.subgraph(component)
+                pr = nx.pagerank(subgraph)
                 is_tree = False
                 if analyze_graph:
                     is_tree = nx.is_tree(subgraph)
@@ -101,6 +102,7 @@ class RelationGraph:
                     node_attrs = self.get_node_attributes(node)
                     if analyze_graph and is_tree and node == root_node:
                         node_attrs['is_root'] = True
+                    node_attrs['page_rank'] = pr.get(node)
                     graph_dict['nodes'][node] = node_attrs
                 edges = subgraph.edges(data=True)  # with attributes
 

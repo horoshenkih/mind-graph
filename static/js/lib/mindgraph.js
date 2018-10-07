@@ -34,12 +34,21 @@ var MindGraph = {
                     if (node_attrs.html) {
                         node_color = color;
                     }
+                    var page_rank_scale = 50.;
                     var node_obj = {
                         'id': node,
                         'label': label,
                         'shape': 'box',
                         'color': node_color,
-                        'mass': 2
+                        'mass': 10,
+                        'font': {
+                            'size': 50 * Math.log(
+                                page_rank_scale * Math.max(
+                                    2./page_rank_scale,
+                                    data.nodes[node]['page_rank']
+                                )
+                            )
+                        }
                     };
                     if (data.nodes[node]['is_root']) {
                         node_obj.mass *= 2;
