@@ -96,7 +96,7 @@ class RelationGraph:
                     is_tree = nx.is_tree(subgraph)
                 root_node = None
                 if analyze_graph and is_tree:
-                    root_node = [n for n, d in subgraph.out_degree().items() if d == 0][0]
+                    root_node = [n for n, d in dict(subgraph.out_degree()).items() if d == 0][0]
 
                 for node in component:
                     node_attrs = self.get_node_attributes(node)
